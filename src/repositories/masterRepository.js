@@ -4,10 +4,10 @@ import { readStore, updateStore } from '../config/store.js';
 const useTestStore = process.env.NODE_ENV === 'test';
 
 export const masterConfigs = {
-  'kelompok-barang': { table: 'kelompok_barang', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'kelompok', 'jumlah_barang'] },
-  satuan: { table: 'satuan', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'satuan', 'jumlah_barang'] },
-  lokasi: { table: 'lokasi', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['rak', 'lokasi', 'jumlah_rak'] },
-  rak: { table: 'rak', fields: ['kode', 'qr_code', 'nama', 'lokasi', 'kapasitas', 'terisi'], count: ['barang', 'rak', 'jumlah_barang'] }
+  'kelompok-barang': { table: 'kelompok_barang', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'kelompok_id', 'jumlah_barang'] },
+  satuan: { table: 'satuan', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'satuan_id', 'jumlah_barang'] },
+  lokasi: { table: 'lokasi', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['rak', 'lokasi_id', 'jumlah_rak'] },
+  rak: { table: 'rak', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['barang', 'rak_id', 'jumlah_barang'] }
 };
 
 function configFor(key) {
@@ -19,40 +19,57 @@ function configFor(key) {
 function withCountSql(config) {
   if (!config.count) return 'm.*';
   const [referenceTable, referenceField, alias] = config.count;
-  return `m.*, (SELECT COUNT(*)::int FROM ${referenceTable} r WHERE r.${referenceField} = m.nama) AS ${alias}`;
+  return `m.*, (SELECT COUNT(*)::int FROM ${referenceTable} r WHERE r.${referenceField} = m.id AND COALESCE(r.is_deleted, FALSE)=FALSE) AS ${alias}`;
 }
 
 function addTestCount(key, item, store) {
   const config = configFor(key);
   if (!config.count) return item;
   const [referenceTable, referenceField, alias] = config.count;
-  return { ...item, [alias]: (store[referenceTable] || []).filter((row) => row[referenceField] === item.nama).length };
+  const result = { ...item, [alias]: (store[referenceTable] || []).filter((row) => row[referenceField] === item.id && !row.is_deleted).length };
+  if (key === 'rak') result.lokasi_detail = store.lokasi.find((row) => row.id === item.lokasi_id && !row.is_deleted) || null;
+  return result;
 }
 
-export async function findAll(key) {
+function selectSql(key, config) {
+  if (key !== 'rak') return withCountSql(config);
+  return `${withCountSql(config)}, json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) AS lokasi_detail`;
+}
+
+export async function findAll(key, search = '') {
   const config = configFor(key);
+  const term = search.trim().toLowerCase();
   if (useTestStore) {
     const store = await readStore();
-    return (store[config.table] || []).map((item) => addTestCount(key, item, store));
+    return (store[config.table] || [])
+      .filter((item) => !term || `${item.kode} ${item.nama}`.toLowerCase().includes(term))
+      .map((item) => addTestCount(key, item, store));
   }
-  return (await query(`SELECT ${withCountSql(config)} FROM ${config.table} m ORDER BY m.id`)).rows;
+  return (await query(
+    `SELECT ${selectSql(key, config)} FROM ${config.table} m
+     ${key === 'rak' ? 'JOIN lokasi l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''}
+     WHERE COALESCE(m.is_deleted, FALSE)=FALSE
+       AND ($1 = '' OR m.kode ILIKE '%' || $1 || '%' OR m.nama ILIKE '%' || $1 || '%')
+     ORDER BY m.id`, [search.trim()]
+  )).rows;
 }
 
 export async function findById(key, id) {
   const config = configFor(key);
   if (useTestStore) {
     const store = await readStore();
-    const item = (store[config.table] || []).find((row) => row.id === id);
+    const item = (store[config.table] || []).find((row) => row.id === id && !row.is_deleted);
     return item ? addTestCount(key, item, store) : null;
   }
-  return (await query(`SELECT ${withCountSql(config)} FROM ${config.table} m WHERE m.id=$1`, [id])).rows[0] || null;
+  return (await query(`SELECT ${selectSql(key, config)} FROM ${config.table} m ${key === 'rak' ? 'JOIN lokasi l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''} WHERE m.id=$1 AND COALESCE(m.is_deleted, FALSE)=FALSE`, [id])).rows[0] || null;
 }
 
 export async function create(key, item) {
   const config = configFor(key);
   if (useTestStore) return updateStore((store) => {
     store[config.table] ||= [];
-    if (store[config.table].some((row) => row.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
+    if (store[config.table].some((row) => !row.is_deleted && row.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
+    if (key === 'rak' && !store.lokasi.some((row) => row.id === item.lokasi_id && !row.is_deleted)) throw Object.assign(new Error('lokasi missing'), { code: 'INVALID_REFERENCE' });
     const created = { id: Math.max(0, ...store[config.table].map((row) => row.id)) + 1, ...item };
     store[config.table].push(created);
     return addTestCount(key, created, store);
@@ -69,9 +86,10 @@ export async function update(key, id, item) {
   const config = configFor(key);
   if (useTestStore) return updateStore((store) => {
     store[config.table] ||= [];
-    const index = store[config.table].findIndex((row) => row.id === id);
+    const index = store[config.table].findIndex((row) => row.id === id && !row.is_deleted);
     if (index < 0) return null;
-    if (store[config.table].some((row) => row.id !== id && row.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
+    if (store[config.table].some((row) => !row.is_deleted && row.id !== id && row.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
+    if (key === 'rak' && !store.lokasi.some((row) => row.id === item.lokasi_id && !row.is_deleted)) throw Object.assign(new Error('lokasi missing'), { code: 'INVALID_REFERENCE' });
     store[config.table][index] = { ...store[config.table][index], ...item };
     return addTestCount(key, store[config.table][index], store);
   });
@@ -83,7 +101,7 @@ export async function update(key, id, item) {
   return result.rowCount ? findById(key, id) : null;
 }
 
-export async function remove(key, id) {
+export async function remove(key, id, deletedBy = null) {
   const config = configFor(key);
   const existing = await findById(key, id);
   if (!existing) return { removed: false, used: false };
@@ -91,9 +109,11 @@ export async function remove(key, id) {
   if (usage > 0) return { removed: false, used: true };
   if (useTestStore) return updateStore((store) => {
     store[config.table] ||= [];
-    store[config.table] = store[config.table].filter((row) => row.id !== id);
+    const index = store[config.table].findIndex((row) => row.id === id && !row.is_deleted);
+    if (index < 0) return { removed: false, used: false };
+    store[config.table][index] = { ...store[config.table][index], is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: deletedBy };
     return { removed: true, used: false };
   });
-  const result = await query(`DELETE FROM ${config.table} WHERE id=$1`, [id]);
+  const result = await query(`UPDATE ${config.table} SET is_deleted=TRUE, deleted_at=NOW(), deleted_by=$2 WHERE id=$1 AND COALESCE(is_deleted, FALSE)=FALSE`, [id, deletedBy]);
   return { removed: Boolean(result.rowCount), used: false };
 }

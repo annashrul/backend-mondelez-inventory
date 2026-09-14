@@ -5,9 +5,9 @@
       "kode": "BRG-001",
       "barcode": "8991001000011",
       "nama": "Kertas A4 70gsm",
-      "kelompok": "Alat Tulis Kantor",
-      "satuan": "Rim",
-      "rak": "Rak A-01",
+      "kelompok_id": 1,
+      "satuan_id": 3,
+      "rak_id": 1,
       "stok": 150,
       "stok_min": 50,
       "harga": 45000
@@ -17,9 +17,9 @@
       "kode": "BRG-002",
       "barcode": "8991001000028",
       "nama": "Pulpen Pilot G-2",
-      "kelompok": "Alat Tulis Kantor",
-      "satuan": "Pcs",
-      "rak": "Rak A-02",
+      "kelompok_id": 1,
+      "satuan_id": 1,
+      "rak_id": 2,
       "stok": 200,
       "stok_min": 30,
       "harga": 15000
@@ -29,12 +29,245 @@
       "kode": "BRG-003",
       "barcode": "8991001000035",
       "nama": "Tinta Printer HP",
-      "kelompok": "IT Supply",
-      "satuan": "Pcs",
-      "rak": "Rak B-01",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
       "stok": 8,
       "stok_min": 10,
       "harga": 250000
+    },
+    {
+      "id": 4,
+      "kode": "TEST-REF-001",
+      "barcode": "9900000000063",
+      "nama": "Barang Referenced Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 9,
+      "stok_min": 1,
+      "harga": 1000,
+      "has_embedding": false
+    },
+    {
+      "id": 5,
+      "kode": "TEST-CRUD-001",
+      "barcode": "9900000000001",
+      "nama": "Barang Smoke Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 10,
+      "stok_min": 2,
+      "harga": 15000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T09:57:12.401Z",
+      "deleted_by": null
+    },
+    {
+      "id": 6,
+      "kode": "TEST-IMG-001",
+      "barcode": "9900000000099",
+      "nama": "Barang Gambar Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 1,
+      "stok_min": 0,
+      "harga": 7500,
+      "image_path": "test/TEST-IMG-001",
+      "image_url": "https://example.test/TEST-IMG-001.jpg",
+      "embedding_model": "test-model",
+      "has_embedding": true,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T09:57:13.242Z",
+      "deleted_by": null
+    },
+    {
+      "id": 7,
+      "kode": "REF-1789379854237",
+      "barcode": "991789379854237",
+      "nama": "Barang Referenced Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 9,
+      "stok_min": 1,
+      "harga": 1000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T09:57:34.431Z",
+      "deleted_by": null
+    },
+    {
+      "id": 8,
+      "kode": "CRUD-1789379874185",
+      "barcode": "911789379874185",
+      "nama": "Barang Smoke Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 10,
+      "stok_min": 2,
+      "harga": 15000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T09:57:54.298Z",
+      "deleted_by": null
+    },
+    {
+      "id": 9,
+      "kode": "REF-1789379874366",
+      "barcode": "991789379874366",
+      "nama": "Barang Referenced Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 9,
+      "stok_min": 1,
+      "harga": 1000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T09:57:54.415Z",
+      "deleted_by": null
+    },
+    {
+      "id": 10,
+      "kode": "IMG-1789379874443",
+      "barcode": "921789379874443",
+      "nama": "Barang Gambar Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 1,
+      "stok_min": 0,
+      "harga": 7500,
+      "image_path": "test/IMG-1789379874443",
+      "image_url": "https://example.test/IMG-1789379874443.jpg",
+      "embedding_model": "test-model",
+      "has_embedding": true,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T09:57:54.515Z",
+      "deleted_by": null
+    },
+    {
+      "id": 11,
+      "kode": "CRUD-1789380086473",
+      "barcode": "911789380086473",
+      "nama": "Barang Smoke Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 10,
+      "stok_min": 2,
+      "harga": 15000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:01:26.646Z",
+      "deleted_by": null
+    },
+    {
+      "id": 12,
+      "kode": "REF-1789380086738",
+      "barcode": "991789380086738",
+      "nama": "Barang Referenced Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 9,
+      "stok_min": 1,
+      "harga": 1000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:01:26.824Z",
+      "deleted_by": null
+    },
+    {
+      "id": 13,
+      "kode": "IMG-1789380086874",
+      "barcode": "921789380086874",
+      "nama": "Barang Gambar Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 1,
+      "stok_min": 0,
+      "harga": 7500,
+      "image_path": "test/IMG-1789380086874",
+      "image_url": "https://example.test/IMG-1789380086874.jpg",
+      "embedding_model": "test-model",
+      "has_embedding": true,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:01:27.023Z",
+      "deleted_by": null
+    },
+    {
+      "id": 14,
+      "kode": "CRUD-1789380483469",
+      "barcode": "911789380483469",
+      "nama": "Barang Smoke Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 10,
+      "stok_min": 2,
+      "harga": 15000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:03.576Z",
+      "deleted_by": null
+    },
+    {
+      "id": 15,
+      "kode": "REF-1789380483627",
+      "barcode": "991789380483627",
+      "nama": "Barang Referenced Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 9,
+      "stok_min": 1,
+      "harga": 1000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:03.673Z",
+      "deleted_by": null
+    },
+    {
+      "id": 16,
+      "kode": "BGD-1789380483701",
+      "barcode": "971789380483701",
+      "nama": "Barang Group Delete Test",
+      "kelompok_id": 5,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 5,
+      "stok_min": 1,
+      "harga": 1000,
+      "has_embedding": false,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:03.755Z",
+      "deleted_by": null
+    },
+    {
+      "id": 17,
+      "kode": "IMG-1789380483802",
+      "barcode": "921789380483802",
+      "nama": "Barang Gambar Test",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
+      "stok": 1,
+      "stok_min": 0,
+      "harga": 7500,
+      "image_path": "test/IMG-1789380483802",
+      "image_url": "https://example.test/IMG-1789380483802.jpg",
+      "embedding_model": "test-model",
+      "has_embedding": true,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:03.879Z",
+      "deleted_by": null
     }
   ],
   "kelompok_barang": [
@@ -61,6 +294,24 @@
       "kode": "KLP-004",
       "nama": "Elektrikal",
       "deskripsi": "Peralatan listrik"
+    },
+    {
+      "id": 5,
+      "kode": "KGD-1789380483701",
+      "nama": "Kelompok Delete 1789380483701",
+      "deskripsi": "Soft delete relation test",
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:03.780Z",
+      "deleted_by": null
+    },
+    {
+      "id": 6,
+      "kode": "KLP-1789380483901",
+      "nama": "Kelompok 1789380483901 Updated",
+      "deskripsi": "Integration test",
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:04.023Z",
+      "deleted_by": null
     }
   ],
   "satuan": [
@@ -81,6 +332,39 @@
       "kode": "STN-003",
       "nama": "Rim",
       "deskripsi": "Satuan rim (500 lembar)"
+    },
+    {
+      "id": 4,
+      "kode": "STN-1789380483901",
+      "nama": "Satuan 1789380483901 Updated",
+      "deskripsi": "Integration test",
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:04.161Z",
+      "deleted_by": null
+    }
+  ],
+  "lokasi": [
+    {
+      "id": 1,
+      "kode": "LOK-001",
+      "nama": "Gudang Utama - Lantai 1",
+      "alamat": "Gedung A, Lantai 1"
+    },
+    {
+      "id": 2,
+      "kode": "LOK-002",
+      "nama": "Gudang Utama - Lantai 2",
+      "alamat": "Gedung A, Lantai 2"
+    },
+    {
+      "id": 3,
+      "kode": "LOK-1789380483901",
+      "nama": "Lokasi 1789380483901 Updated",
+      "alamat": "Gedung Test",
+      "deskripsi": "Integration test",
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:04.330Z",
+      "deleted_by": null
     }
   ],
   "rak": [
@@ -89,7 +373,7 @@
       "kode": "RAK-A01",
       "qr_code": "RAK:RAK-A01",
       "nama": "Rak A-01",
-      "lokasi": "Gudang Utama - Lantai 1",
+      "lokasi_id": 1,
       "kapasitas": 100,
       "terisi": 65
     },
@@ -98,7 +382,7 @@
       "kode": "RAK-A02",
       "qr_code": "RAK:RAK-A02",
       "nama": "Rak A-02",
-      "lokasi": "Gudang Utama - Lantai 1",
+      "lokasi_id": 1,
       "kapasitas": 100,
       "terisi": 80
     },
@@ -107,10 +391,2349 @@
       "kode": "RAK-B01",
       "qr_code": "RAK:RAK-B01",
       "nama": "Rak B-01",
-      "lokasi": "Gudang Utama - Lantai 2",
+      "lokasi_id": 2,
       "kapasitas": 150,
       "terisi": 45
+    },
+    {
+      "id": 4,
+      "kode": "RAK-1789380483901",
+      "qr_code": "QR-1789380483901",
+      "nama": "Rak 1789380483901 Updated",
+      "lokasi_id": 1,
+      "kapasitas": 20,
+      "terisi": 0,
+      "is_deleted": true,
+      "deleted_at": "2026-09-14T10:08:04.475Z",
+      "deleted_by": null
     }
   ],
-  "lokasi": []
+  "log_activity": [
+    {
+      "id": 251,
+      "waktu": "2026-09-14T10:08:04.900Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 250,
+      "waktu": "2026-09-14T10:08:04.886Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 249,
+      "waktu": "2026-09-14T10:08:04.872Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 248,
+      "waktu": "2026-09-14T10:08:04.856Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 247,
+      "waktu": "2026-09-14T10:08:04.723Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 246,
+      "waktu": "2026-09-14T10:08:04.593Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 245,
+      "waktu": "2026-09-14T10:08:04.569Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 244,
+      "waktu": "2026-09-14T10:08:04.544Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 243,
+      "waktu": "2026-09-14T10:08:04.527Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 242,
+      "waktu": "2026-09-14T10:08:04.484Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 241,
+      "waktu": "2026-09-14T10:08:04.437Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 240,
+      "waktu": "2026-09-14T10:08:04.379Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789380483901",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 239,
+      "waktu": "2026-09-14T10:08:04.339Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 238,
+      "waktu": "2026-09-14T10:08:04.278Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 237,
+      "waktu": "2026-09-14T10:08:04.224Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789380483901",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 236,
+      "waktu": "2026-09-14T10:08:04.169Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 235,
+      "waktu": "2026-09-14T10:08:04.125Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 234,
+      "waktu": "2026-09-14T10:08:04.080Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789380483901",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 233,
+      "waktu": "2026-09-14T10:08:04.034Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 232,
+      "waktu": "2026-09-14T10:08:03.977Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789380483901 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 231,
+      "waktu": "2026-09-14T10:08:03.924Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789380483901",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 230,
+      "waktu": "2026-09-14T10:08:03.887Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 229,
+      "waktu": "2026-09-14T10:08:03.859Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 228,
+      "waktu": "2026-09-14T10:08:03.830Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 227,
+      "waktu": "2026-09-14T10:08:03.787Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok Delete 1789380483701",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 226,
+      "waktu": "2026-09-14T10:08:03.761Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Group Delete Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 225,
+      "waktu": "2026-09-14T10:08:03.736Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Group Delete Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 224,
+      "waktu": "2026-09-14T10:08:03.719Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok Delete 1789380483701",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 223,
+      "waktu": "2026-09-14T10:08:03.679Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 222,
+      "waktu": "2026-09-14T10:08:03.644Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 221,
+      "waktu": "2026-09-14T10:08:03.581Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 220,
+      "waktu": "2026-09-14T10:08:03.545Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 219,
+      "waktu": "2026-09-14T10:08:03.508Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 218,
+      "waktu": "2026-09-14T10:01:27.890Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 217,
+      "waktu": "2026-09-14T10:01:27.875Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 216,
+      "waktu": "2026-09-14T10:01:27.865Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 215,
+      "waktu": "2026-09-14T10:01:27.852Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 214,
+      "waktu": "2026-09-14T10:01:27.738Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 213,
+      "waktu": "2026-09-14T10:01:27.670Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 212,
+      "waktu": "2026-09-14T10:01:27.654Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 211,
+      "waktu": "2026-09-14T10:01:27.636Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 210,
+      "waktu": "2026-09-14T10:01:27.611Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 209,
+      "waktu": "2026-09-14T10:01:27.578Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 208,
+      "waktu": "2026-09-14T10:01:27.532Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 207,
+      "waktu": "2026-09-14T10:01:27.419Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789380087036",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 206,
+      "waktu": "2026-09-14T10:01:27.395Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 205,
+      "waktu": "2026-09-14T10:01:27.356Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 204,
+      "waktu": "2026-09-14T10:01:27.324Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789380087036",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 203,
+      "waktu": "2026-09-14T10:01:27.287Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 202,
+      "waktu": "2026-09-14T10:01:27.248Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 201,
+      "waktu": "2026-09-14T10:01:27.197Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789380087036",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 200,
+      "waktu": "2026-09-14T10:01:27.162Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 199,
+      "waktu": "2026-09-14T10:01:27.103Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789380087036 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 198,
+      "waktu": "2026-09-14T10:01:27.069Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789380087036",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 197,
+      "waktu": "2026-09-14T10:01:27.030Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 196,
+      "waktu": "2026-09-14T10:01:26.976Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 195,
+      "waktu": "2026-09-14T10:01:26.935Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 194,
+      "waktu": "2026-09-14T10:01:26.836Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 193,
+      "waktu": "2026-09-14T10:01:26.764Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 192,
+      "waktu": "2026-09-14T10:01:26.659Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 191,
+      "waktu": "2026-09-14T10:01:26.606Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 190,
+      "waktu": "2026-09-14T10:01:26.533Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 189,
+      "waktu": "2026-09-14T09:57:55.488Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 188,
+      "waktu": "2026-09-14T09:57:55.479Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 187,
+      "waktu": "2026-09-14T09:57:55.469Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 186,
+      "waktu": "2026-09-14T09:57:55.455Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 185,
+      "waktu": "2026-09-14T09:57:55.324Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 184,
+      "waktu": "2026-09-14T09:57:55.249Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 183,
+      "waktu": "2026-09-14T09:57:55.212Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 182,
+      "waktu": "2026-09-14T09:57:55.127Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 181,
+      "waktu": "2026-09-14T09:57:55.083Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 180,
+      "waktu": "2026-09-14T09:57:54.952Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 179,
+      "waktu": "2026-09-14T09:57:54.919Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 178,
+      "waktu": "2026-09-14T09:57:54.895Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379874540",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 177,
+      "waktu": "2026-09-14T09:57:54.868Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 176,
+      "waktu": "2026-09-14T09:57:54.832Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 175,
+      "waktu": "2026-09-14T09:57:54.796Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379874540",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 174,
+      "waktu": "2026-09-14T09:57:54.759Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 173,
+      "waktu": "2026-09-14T09:57:54.718Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 172,
+      "waktu": "2026-09-14T09:57:54.690Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379874540",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 171,
+      "waktu": "2026-09-14T09:57:54.664Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 170,
+      "waktu": "2026-09-14T09:57:54.629Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379874540 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 169,
+      "waktu": "2026-09-14T09:57:54.590Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379874540",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 168,
+      "waktu": "2026-09-14T09:57:54.529Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 167,
+      "waktu": "2026-09-14T09:57:54.498Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 166,
+      "waktu": "2026-09-14T09:57:54.471Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 165,
+      "waktu": "2026-09-14T09:57:54.420Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 164,
+      "waktu": "2026-09-14T09:57:54.385Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 163,
+      "waktu": "2026-09-14T09:57:54.309Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 162,
+      "waktu": "2026-09-14T09:57:54.270Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 161,
+      "waktu": "2026-09-14T09:57:54.226Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 160,
+      "waktu": "2026-09-14T09:57:35.900Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 159,
+      "waktu": "2026-09-14T09:57:35.891Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 158,
+      "waktu": "2026-09-14T09:57:35.880Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 157,
+      "waktu": "2026-09-14T09:57:35.864Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 156,
+      "waktu": "2026-09-14T09:57:35.726Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 155,
+      "waktu": "2026-09-14T09:57:35.623Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 154,
+      "waktu": "2026-09-14T09:57:35.581Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 153,
+      "waktu": "2026-09-14T09:57:35.531Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 152,
+      "waktu": "2026-09-14T09:57:35.486Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 151,
+      "waktu": "2026-09-14T09:57:35.435Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 150,
+      "waktu": "2026-09-14T09:57:35.393Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 149,
+      "waktu": "2026-09-14T09:57:35.347Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379854653",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 148,
+      "waktu": "2026-09-14T09:57:35.315Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 147,
+      "waktu": "2026-09-14T09:57:35.269Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 146,
+      "waktu": "2026-09-14T09:57:35.227Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379854653",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 145,
+      "waktu": "2026-09-14T09:57:35.191Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 144,
+      "waktu": "2026-09-14T09:57:35.147Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 143,
+      "waktu": "2026-09-14T09:57:35.016Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379854653",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 142,
+      "waktu": "2026-09-14T09:57:34.867Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 141,
+      "waktu": "2026-09-14T09:57:34.771Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379854653 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 140,
+      "waktu": "2026-09-14T09:57:34.714Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379854653",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 139,
+      "waktu": "2026-09-14T09:57:34.482Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 138,
+      "waktu": "2026-09-14T09:57:34.313Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 137,
+      "waktu": "2026-09-14T09:57:16.117Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 136,
+      "waktu": "2026-09-14T09:57:16.105Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 135,
+      "waktu": "2026-09-14T09:57:16.093Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 134,
+      "waktu": "2026-09-14T09:57:16.073Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 133,
+      "waktu": "2026-09-14T09:57:15.902Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 132,
+      "waktu": "2026-09-14T09:57:15.802Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 131,
+      "waktu": "2026-09-14T09:57:15.741Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 130,
+      "waktu": "2026-09-14T09:57:15.713Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 129,
+      "waktu": "2026-09-14T09:57:15.690Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 128,
+      "waktu": "2026-09-14T09:57:15.613Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 127,
+      "waktu": "2026-09-14T09:57:15.533Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 126,
+      "waktu": "2026-09-14T09:57:15.497Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379833264",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 125,
+      "waktu": "2026-09-14T09:57:15.402Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 124,
+      "waktu": "2026-09-14T09:57:15.335Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 123,
+      "waktu": "2026-09-14T09:57:15.236Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379833264",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 122,
+      "waktu": "2026-09-14T09:57:15.166Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 121,
+      "waktu": "2026-09-14T09:57:15.062Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 120,
+      "waktu": "2026-09-14T09:57:15.001Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379833264",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 119,
+      "waktu": "2026-09-14T09:57:14.869Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 118,
+      "waktu": "2026-09-14T09:57:13.931Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379833264 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 117,
+      "waktu": "2026-09-14T09:57:13.551Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379833264",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 116,
+      "waktu": "2026-09-14T09:57:13.249Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 115,
+      "waktu": "2026-09-14T09:57:13.211Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 114,
+      "waktu": "2026-09-14T09:57:13.153Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 113,
+      "waktu": "2026-09-14T09:57:12.416Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Arsip barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 112,
+      "waktu": "2026-09-14T09:57:12.330Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 111,
+      "waktu": "2026-09-14T09:57:12.220Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 110,
+      "waktu": "2026-09-14T09:52:52.825Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 109,
+      "waktu": "2026-09-14T09:52:52.813Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 108,
+      "waktu": "2026-09-14T09:52:52.803Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 107,
+      "waktu": "2026-09-14T09:52:52.784Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 106,
+      "waktu": "2026-09-14T09:52:52.632Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 105,
+      "waktu": "2026-09-14T09:52:52.534Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 104,
+      "waktu": "2026-09-14T09:52:52.512Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 103,
+      "waktu": "2026-09-14T09:52:52.494Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 102,
+      "waktu": "2026-09-14T09:52:52.482Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 101,
+      "waktu": "2026-09-14T09:52:52.437Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 100,
+      "waktu": "2026-09-14T09:52:52.394Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 99,
+      "waktu": "2026-09-14T09:52:52.340Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379571741",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 98,
+      "waktu": "2026-09-14T09:52:52.279Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 97,
+      "waktu": "2026-09-14T09:52:52.206Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 96,
+      "waktu": "2026-09-14T09:52:52.113Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379571741",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 95,
+      "waktu": "2026-09-14T09:52:52.061Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 94,
+      "waktu": "2026-09-14T09:52:51.998Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 93,
+      "waktu": "2026-09-14T09:52:51.921Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379571741",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 92,
+      "waktu": "2026-09-14T09:52:51.880Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 91,
+      "waktu": "2026-09-14T09:52:51.814Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379571741 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 90,
+      "waktu": "2026-09-14T09:52:51.761Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379571741",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 89,
+      "waktu": "2026-09-14T09:52:51.733Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 88,
+      "waktu": "2026-09-14T09:52:51.705Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 87,
+      "waktu": "2026-09-14T09:52:51.687Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 86,
+      "waktu": "2026-09-14T09:52:51.655Z",
+      "user_id": null,
+      "aksi": "Gagal Hapus",
+      "modul": "Master Barang",
+      "detail": "Gagal hapus barang karena masih digunakan transaksi: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 85,
+      "waktu": "2026-09-14T09:52:51.632Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Referenced Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 84,
+      "waktu": "2026-09-14T09:52:51.588Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 83,
+      "waktu": "2026-09-14T09:52:51.567Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 82,
+      "waktu": "2026-09-14T09:52:51.540Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 81,
+      "waktu": "2026-09-14T09:50:50.375Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 80,
+      "waktu": "2026-09-14T09:50:50.365Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 79,
+      "waktu": "2026-09-14T09:50:50.349Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 78,
+      "waktu": "2026-09-14T09:50:50.332Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 77,
+      "waktu": "2026-09-14T09:50:50.237Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 76,
+      "waktu": "2026-09-14T09:50:50.187Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 75,
+      "waktu": "2026-09-14T09:50:50.172Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 74,
+      "waktu": "2026-09-14T09:50:50.162Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 73,
+      "waktu": "2026-09-14T09:50:50.154Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 72,
+      "waktu": "2026-09-14T09:50:50.130Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 71,
+      "waktu": "2026-09-14T09:50:50.106Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 70,
+      "waktu": "2026-09-14T09:50:50.087Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379449879",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 69,
+      "waktu": "2026-09-14T09:50:50.065Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 68,
+      "waktu": "2026-09-14T09:50:50.034Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 67,
+      "waktu": "2026-09-14T09:50:50.003Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379449879",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 66,
+      "waktu": "2026-09-14T09:50:49.988Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 65,
+      "waktu": "2026-09-14T09:50:49.969Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 64,
+      "waktu": "2026-09-14T09:50:49.952Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379449879",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 63,
+      "waktu": "2026-09-14T09:50:49.935Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 62,
+      "waktu": "2026-09-14T09:50:49.915Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379449879 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 61,
+      "waktu": "2026-09-14T09:50:49.894Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379449879",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 60,
+      "waktu": "2026-09-14T09:50:49.874Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 59,
+      "waktu": "2026-09-14T09:50:49.857Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 58,
+      "waktu": "2026-09-14T09:50:49.841Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 57,
+      "waktu": "2026-09-14T09:50:49.757Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 56,
+      "waktu": "2026-09-14T09:50:49.734Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 55,
+      "waktu": "2026-09-14T09:50:49.705Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 54,
+      "waktu": "2026-09-14T09:48:00.370Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 53,
+      "waktu": "2026-09-14T09:48:00.345Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 52,
+      "waktu": "2026-09-14T09:48:00.308Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 51,
+      "waktu": "2026-09-14T09:48:00.226Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 50,
+      "waktu": "2026-09-14T09:48:00.037Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 49,
+      "waktu": "2026-09-14T09:47:59.940Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 48,
+      "waktu": "2026-09-14T09:47:59.900Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 47,
+      "waktu": "2026-09-14T09:47:59.861Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 46,
+      "waktu": "2026-09-14T09:47:59.842Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 45,
+      "waktu": "2026-09-14T09:47:59.811Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 44,
+      "waktu": "2026-09-14T09:47:59.777Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 43,
+      "waktu": "2026-09-14T09:47:59.747Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379279159",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 42,
+      "waktu": "2026-09-14T09:47:59.712Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 41,
+      "waktu": "2026-09-14T09:47:59.649Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 40,
+      "waktu": "2026-09-14T09:47:59.598Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379279159",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 39,
+      "waktu": "2026-09-14T09:47:59.558Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 38,
+      "waktu": "2026-09-14T09:47:59.488Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 37,
+      "waktu": "2026-09-14T09:47:59.425Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379279159",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 36,
+      "waktu": "2026-09-14T09:47:59.337Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 35,
+      "waktu": "2026-09-14T09:47:59.265Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379279159 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 34,
+      "waktu": "2026-09-14T09:47:59.182Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379279159",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 33,
+      "waktu": "2026-09-14T09:47:59.150Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 32,
+      "waktu": "2026-09-14T09:47:59.130Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 31,
+      "waktu": "2026-09-14T09:47:59.106Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 30,
+      "waktu": "2026-09-14T09:47:59.005Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 29,
+      "waktu": "2026-09-14T09:47:58.965Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 28,
+      "waktu": "2026-09-14T09:47:58.766Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 27,
+      "waktu": "2026-09-14T09:47:29.895Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 26,
+      "waktu": "2026-09-14T09:47:29.888Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Pengguna",
+      "detail": "Hapus pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 25,
+      "waktu": "2026-09-14T09:47:29.882Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Pengguna",
+      "detail": "Edit pengguna: Updated User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 24,
+      "waktu": "2026-09-14T09:47:29.871Z",
+      "user_id": 2,
+      "aksi": "Login",
+      "modul": "Auth",
+      "detail": "Login berhasil",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 23,
+      "waktu": "2026-09-14T09:47:29.779Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Pengguna",
+      "detail": "Tambah pengguna: Integration User",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 22,
+      "waktu": "2026-09-14T09:47:29.727Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: User Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 21,
+      "waktu": "2026-09-14T09:47:29.715Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Level Pengguna",
+      "detail": "Hapus level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 20,
+      "waktu": "2026-09-14T09:47:29.705Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Level Pengguna",
+      "detail": "Edit level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 19,
+      "waktu": "2026-09-14T09:47:29.698Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Level Pengguna",
+      "detail": "Tambah level: Test Level",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 18,
+      "waktu": "2026-09-14T09:47:29.672Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Rak",
+      "detail": "Hapus rak: Rak 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 17,
+      "waktu": "2026-09-14T09:47:29.652Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Rak",
+      "detail": "Edit rak: Rak 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 16,
+      "waktu": "2026-09-14T09:47:29.634Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Rak",
+      "detail": "Tambah rak: Rak 1789379249398",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 15,
+      "waktu": "2026-09-14T09:47:29.619Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Lokasi",
+      "detail": "Hapus lokasi: Lokasi 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 14,
+      "waktu": "2026-09-14T09:47:29.602Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Lokasi",
+      "detail": "Edit lokasi: Lokasi 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 13,
+      "waktu": "2026-09-14T09:47:29.585Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Lokasi",
+      "detail": "Tambah lokasi: Lokasi 1789379249398",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 12,
+      "waktu": "2026-09-14T09:47:29.569Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Satuan",
+      "detail": "Hapus satuan: Satuan 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 11,
+      "waktu": "2026-09-14T09:47:29.550Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Satuan",
+      "detail": "Edit satuan: Satuan 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 10,
+      "waktu": "2026-09-14T09:47:29.527Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Satuan",
+      "detail": "Tambah satuan: Satuan 1789379249398",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 9,
+      "waktu": "2026-09-14T09:47:29.505Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Kelompok Barang",
+      "detail": "Hapus kelompok barang: Kelompok 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 8,
+      "waktu": "2026-09-14T09:47:29.481Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Kelompok Barang",
+      "detail": "Edit kelompok barang: Kelompok 1789379249398 Updated",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 7,
+      "waktu": "2026-09-14T09:47:29.430Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Kelompok Barang",
+      "detail": "Tambah kelompok barang: Kelompok 1789379249398",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 6,
+      "waktu": "2026-09-14T09:47:29.382Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 5,
+      "waktu": "2026-09-14T09:47:29.359Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 4,
+      "waktu": "2026-09-14T09:47:29.335Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Gambar Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 3,
+      "waktu": "2026-09-14T09:47:29.239Z",
+      "user_id": null,
+      "aksi": "Hapus",
+      "modul": "Master Barang",
+      "detail": "Hapus barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 2,
+      "waktu": "2026-09-14T09:47:29.205Z",
+      "user_id": null,
+      "aksi": "Edit",
+      "modul": "Master Barang",
+      "detail": "Edit barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "id": 1,
+      "waktu": "2026-09-14T09:47:29.153Z",
+      "user_id": null,
+      "aksi": "Tambah",
+      "modul": "Master Barang",
+      "detail": "Tambah barang: Barang Smoke Test",
+      "ip": "::ffff:127.0.0.1"
+    }
+  ],
+  "pengambilan_barang": [
+    {
+      "id": 1789379571643,
+      "tanggal": "2026-09-14T09:52:51.643Z",
+      "no_ref": "AMB-20260914-JIKT",
+      "pemohon": "Integration Test",
+      "barang_id": 4,
+      "rak_id": 3,
+      "operator_id": 1,
+      "qr_code": "RAK:RAK-B01",
+      "qty": 1,
+      "keterangan": "Menguji proteksi hapus barang",
+      "status": "Disetujui"
+    },
+    {
+      "id": 1789379854352,
+      "tanggal": "2026-09-14T09:57:34.352Z",
+      "no_ref": "AMB-20260914-OROT",
+      "pemohon": "Integration Test",
+      "barang_id": 7,
+      "rak_id": 3,
+      "operator_id": 1,
+      "qr_code": "RAK:RAK-B01",
+      "qty": 1,
+      "keterangan": "Menguji proteksi hapus barang",
+      "status": "Disetujui"
+    },
+    {
+      "id": 1789379874400,
+      "tanggal": "2026-09-14T09:57:54.400Z",
+      "no_ref": "AMB-20260914-JE42",
+      "pemohon": "Integration Test",
+      "barang_id": 9,
+      "rak_id": 3,
+      "operator_id": 1,
+      "qr_code": "RAK:RAK-B01",
+      "qty": 1,
+      "keterangan": "Menguji proteksi hapus barang",
+      "status": "Disetujui"
+    },
+    {
+      "id": 1789380086791,
+      "tanggal": "2026-09-14T10:01:26.791Z",
+      "no_ref": "AMB-20260914-SBUO",
+      "pemohon": "Integration Test",
+      "barang_id": 12,
+      "rak_id": 3,
+      "operator_id": 1,
+      "qr_code": "RAK:RAK-B01",
+      "qty": 1,
+      "keterangan": "Menguji proteksi hapus barang",
+      "status": "Disetujui"
+    },
+    {
+      "id": 1789380483657,
+      "tanggal": "2026-09-14T10:08:03.657Z",
+      "no_ref": "AMB-20260914-1HC4",
+      "pemohon": "Integration Test",
+      "barang_id": 15,
+      "rak_id": 3,
+      "operator_id": 1,
+      "qr_code": "RAK:RAK-B01",
+      "qty": 1,
+      "keterangan": "Menguji proteksi hapus barang",
+      "status": "Disetujui"
+    }
+  ]
 }

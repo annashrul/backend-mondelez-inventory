@@ -5,9 +5,9 @@
       "kode": "BRG-001",
       "barcode": "8991001000011",
       "nama": "Kertas A4 70gsm",
-      "kelompok": "Alat Tulis Kantor",
-      "satuan": "Rim",
-      "rak": "Rak A-01",
+      "kelompok_id": 1,
+      "satuan_id": 3,
+      "rak_id": 1,
       "stok": 150,
       "stok_min": 50,
       "harga": 45000
@@ -17,9 +17,9 @@
       "kode": "BRG-002",
       "barcode": "8991001000028",
       "nama": "Pulpen Pilot G-2",
-      "kelompok": "Alat Tulis Kantor",
-      "satuan": "Pcs",
-      "rak": "Rak A-02",
+      "kelompok_id": 1,
+      "satuan_id": 1,
+      "rak_id": 2,
       "stok": 200,
       "stok_min": 30,
       "harga": 15000
@@ -29,9 +29,9 @@
       "kode": "BRG-003",
       "barcode": "8991001000035",
       "nama": "Tinta Printer HP",
-      "kelompok": "IT Supply",
-      "satuan": "Pcs",
-      "rak": "Rak B-01",
+      "kelompok_id": 2,
+      "satuan_id": 1,
+      "rak_id": 3,
       "stok": 8,
       "stok_min": 10,
       "harga": 250000
@@ -83,13 +83,27 @@
       "deskripsi": "Satuan rim (500 lembar)"
     }
   ],
+  "lokasi": [
+    {
+      "id": 1,
+      "kode": "LOK-001",
+      "nama": "Gudang Utama - Lantai 1",
+      "alamat": "Gedung A, Lantai 1"
+    },
+    {
+      "id": 2,
+      "kode": "LOK-002",
+      "nama": "Gudang Utama - Lantai 2",
+      "alamat": "Gedung A, Lantai 2"
+    }
+  ],
   "rak": [
     {
       "id": 1,
       "kode": "RAK-A01",
       "qr_code": "RAK:RAK-A01",
       "nama": "Rak A-01",
-      "lokasi": "Gudang Utama - Lantai 1",
+      "lokasi_id": 1,
       "kapasitas": 100,
       "terisi": 65
     },
@@ -98,7 +112,7 @@
       "kode": "RAK-A02",
       "qr_code": "RAK:RAK-A02",
       "nama": "Rak A-02",
-      "lokasi": "Gudang Utama - Lantai 1",
+      "lokasi_id": 1,
       "kapasitas": 100,
       "terisi": 80
     },
@@ -107,7 +121,7 @@
       "kode": "RAK-B01",
       "qr_code": "RAK:RAK-B01",
       "nama": "Rak B-01",
-      "lokasi": "Gudang Utama - Lantai 2",
+      "lokasi_id": 2,
       "kapasitas": 150,
       "terisi": 45
     }
