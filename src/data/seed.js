@@ -1,0 +1,23 @@
+export const seedData = {
+  barang: [
+    { id: 1, kode: 'BRG-001', barcode: '8991001000011', nama: 'Kertas A4 70gsm', kelompok: 'Alat Tulis Kantor', satuan: 'Rim', rak: 'Rak A-01', stok: 150, stok_min: 50, harga: 45000 },
+    { id: 2, kode: 'BRG-002', barcode: '8991001000028', nama: 'Pulpen Pilot G-2', kelompok: 'Alat Tulis Kantor', satuan: 'Pcs', rak: 'Rak A-02', stok: 200, stok_min: 30, harga: 15000 },
+    { id: 3, kode: 'BRG-003', barcode: '8991001000035', nama: 'Tinta Printer HP', kelompok: 'IT Supply', satuan: 'Pcs', rak: 'Rak B-01', stok: 8, stok_min: 10, harga: 250000 }
+  ],
+  kelompok_barang: [
+    { id: 1, kode: 'KLP-001', nama: 'Alat Tulis Kantor', deskripsi: 'Perlengkapan tulis menulis' },
+    { id: 2, kode: 'KLP-002', nama: 'IT Supply', deskripsi: 'Perlengkapan IT' },
+    { id: 3, kode: 'KLP-003', nama: 'Kebersihan', deskripsi: 'Alat dan bahan kebersihan' },
+    { id: 4, kode: 'KLP-004', nama: 'Elektrikal', deskripsi: 'Peralatan listrik' }
+  ],
+  satuan: [
+    { id: 1, kode: 'STN-001', nama: 'Pcs', deskripsi: 'Satuan per buah' },
+    { id: 2, kode: 'STN-002', nama: 'Box', deskripsi: 'Satuan per kotak' },
+    { id: 3, kode: 'STN-003', nama: 'Rim', deskripsi: 'Satuan rim (500 lembar)' }
+  ],
+  rak: [
+    { id: 1, kode: 'RAK-A01', qr_code: 'RAK:RAK-A01', nama: 'Rak A-01', lokasi: 'Gudang Utama - Lantai 1', kapasitas: 100, terisi: 65 },
+    { id: 2, kode: 'RAK-A02', qr_code: 'RAK:RAK-A02', nama: 'Rak A-02', lokasi: 'Gudang Utama - Lantai 1', kapasitas: 100, terisi: 80 },
+    { id: 3, kode: 'RAK-B01', qr_code: 'RAK:RAK-B01', nama: 'Rak B-01', lokasi: 'Gudang Utama - Lantai 2', kapasitas: 150, terisi: 45 }
+  ]
+};
