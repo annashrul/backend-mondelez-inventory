@@ -1,0 +1,48 @@
+
+disini saya akan membuat sebuah sistem aplikasi berbasis web
+
+aplikasi ini dibuata untuk mempermudah dan mendeteksi siapa yang melakukan pengambilan barang dengan cara di scan barcode di tiap rak 
+
+
+menu yang ada kurang lebih seperti ini
+
+1. ✅ Dashboard - Overview statistik
+2. ✅ Master Barang - CRUD data barang
+3. ✅ Kelompok Barang - Kategori/kelompok barang
+4. ✅ Master Rak Barang - Lokasi penyimpanan
+5. ✅ Master Satuan Barang - Unit of measure
+6. ✅ Master Pengguna - Manajemen user
+7. ✅ Level Pengguna - Role & permission
+8. ✅ Adjustment Stok - Penyesuaian stok
+9. ✅ Kartu Stok - Riwayat barang masuk/keluar
+10. ✅ Pengambilan Barang - Pencatatan pengambilan
+11. ✅ Cetak Barcode/QR Code - Generate & print label
+12. ✅ Log Activity - Audit trail
+13. ✅ Closing Shift - Pergantian shift
+14. ✅ Pengaturan - Konfigurasi sistem
+
+
+ada 3 role. admin, operator, dan owner(saya sendiri)
+
+ketika ada orang yang ingin mengambil barang di perusahaan itu harus maka operator akan mengscan rak untuk mengambil barang tersebut
+ketika di scan operator harus memasukkan jumlah qty dan orang yang mengambil nya
+
+inti dari aplikasi ini goalsnya seperti yang di atas. 
+
+kamu integrasikan langsung dengan menu menu yang di atas 
+
+1 rak itu 1 qr code
+
+
+disini juga saya mempunyai service ai-service untuk pencarian by gambar
+
+
+jadi ketika ada orang yang ingin mengambil sparepart itu si operator akan melakukan/memfoto terlebih dahulu barangnya untuk melakukan pencarian. lalu muncul informasi rak, nama barang dan lainnya
+ketika step itu sudah dilalui maka operator akan mengscan rak sesuai informasi yang sudah di dapat
+
+
+kamu harus integrasikan juga ke folder ai-service
+
+kamu harus bertindak sebagai seorang senior fullstack
+
+
