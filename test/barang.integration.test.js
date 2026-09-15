@@ -128,6 +128,76 @@ test('barang yang sudah digunakan transaksi dihapus dengan flag soft delete', as
   assert.equal(listData(found.body).some((item) => item.id === created.body.id), false);
 });
 
+test('adjustment stok mengubah saldo barang dan menulis kartu stok', async () => {
+  const suffix = Date.now();
+  const created = await request('/barang', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-user-id': '1' },
+    body: JSON.stringify({
+      kode: `ADJB-${suffix}`, barcode: `96${suffix}`, nama: 'Barang Adjustment Test',
+      kelompok_id: 2, satuan_id: 1, rak_id: 3, stok: 10, stok_min: 1, harga: 1000
+    })
+  });
+  assert.equal(created.status, 201);
+
+  const tambah = await request('/adjustment', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-user-id': '1' },
+    body: JSON.stringify({
+      tanggal: '2026-09-15',
+      barang_id: created.body.id,
+      tipe: 'Tambah',
+      qty: 5,
+      alasan: 'Koreksi stok fisik'
+    })
+  });
+  assert.equal(tambah.status, 201);
+  assert.match(tambah.body.no_ref, /^ADJ-/);
+  assert.equal(tambah.body.qty, 5);
+
+  const afterTambah = await request(`/barang/${created.body.id}`);
+  assert.equal(afterTambah.body.stok, 15);
+
+  const kurang = await request('/adjustment', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-user-id': '1' },
+    body: JSON.stringify({
+      tanggal: '2026-09-15',
+      barang_id: created.body.id,
+      tipe: 'Kurang',
+      qty: 3,
+      alasan: 'Barang rusak saat stok opname'
+    })
+  });
+  assert.equal(kurang.status, 201);
+
+  const afterKurang = await request(`/barang/${created.body.id}`);
+  assert.equal(afterKurang.body.stok, 12);
+
+  const adjustmentList = await request(`/adjustment?search=${encodeURIComponent(kurang.body.no_ref)}`);
+  assert.equal(adjustmentList.status, 200);
+  assert.ok(listData(adjustmentList.body).some((row) => row.no_ref === kurang.body.no_ref && row.barang_detail.nama === 'Barang Adjustment Test'));
+
+  const kartu = await request(`/kartu-stok?search=${encodeURIComponent(kurang.body.no_ref)}`);
+  assert.equal(kartu.status, 200);
+  assert.ok(listData(kartu.body).some((row) => row.no_ref === kurang.body.no_ref && row.tipe === 'Keluar' && row.saldo === 12));
+
+  const overdraw = await request('/adjustment', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-user-id': '1' },
+    body: JSON.stringify({
+      tanggal: '2026-09-15',
+      barang_id: created.body.id,
+      tipe: 'Kurang',
+      qty: 99,
+      alasan: 'Menguji stok minus'
+    })
+  });
+  assert.equal(overdraw.status, 409);
+
+  assert.equal((await request(`/barang/${created.body.id}`, { method: 'DELETE' })).status, 200);
+});
+
 test('kelompok bisa dihapus setelah semua barang terkait diarsipkan', async () => {
   const suffix = Date.now();
   const group = await request('/kelompok-barang', {

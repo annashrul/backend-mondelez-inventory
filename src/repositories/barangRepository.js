@@ -13,6 +13,16 @@ const fields = `b.id, b.kode, b.barcode, b.nama,
 const joins = `LEFT JOIN kelompok_barang k ON k.id=b.kelompok_id
   LEFT JOIN satuan s ON s.id=b.satuan_id LEFT JOIN rak r ON r.id=b.rak_id`;
 const useTestStore = process.env.NODE_ENV === "test";
+const codePrefix = "BRG";
+
+function nextCodeFromRows(rows) {
+  const pattern = new RegExp(`^${codePrefix}-(\\d+)$`, "i");
+  const max = rows.reduce((highest, row) => {
+    const match = String(row.kode || "").match(pattern);
+    return match ? Math.max(highest, Number(match[1]) || 0) : highest;
+  }, 0);
+  return `${codePrefix}-${String(max + 1).padStart(3, "0")}`;
+}
 
 function hydrateMasterDetails(item, store) {
   const kelompok = store.kelompok_barang.find((row) => row.id === item.kelompok_id);
@@ -68,6 +78,15 @@ export async function findById(id) {
     [id],
   );
   return result.rows[0] || null;
+}
+
+export async function generateCode() {
+  if (useTestStore) {
+    const store = await readStore();
+    return nextCodeFromRows(store.barang || []);
+  }
+  const result = await query("SELECT kode FROM barang WHERE kode ILIKE $1", [`${codePrefix}-%`]);
+  return nextCodeFromRows(result.rows);
 }
 
 export async function create(item, image = {}) {

@@ -13,6 +13,14 @@ const permissionNames = (ids) => catalog.flatMap((m) => m.actions.filter((a) => 
 const levelView = (level) => ({ ...level, action_ids: level.action_ids || [], permissions: permissionNames(level.action_ids || []), jumlah_user: test.users.filter((u) => u.level_id === level.id).length });
 const userView = (user) => { const level = test.levels.find((l) => l.id === user.level_id); const { password, ...safe } = user; return { ...safe, level_detail: level ? { id: level.id, kode: level.kode, nama: level.nama } : null, permissions: permissionNames(level?.action_ids || []) }; };
 
+function nextLevelCode(rows) {
+  const max = rows.reduce((highest, row) => {
+    const match = String(row.kode || '').match(/^LVL-(\d+)$/i);
+    return match ? Math.max(highest, Number(match[1]) || 0) : highest;
+  }, 0);
+  return `LVL-${String(max + 1).padStart(3, '0')}`;
+}
+
 export async function findLevels(search = '') {
   const term = search.trim().toLowerCase();
   if (useTestStore) return test.levels.map(levelView).filter((level) => !term || `${level.kode} ${level.nama} ${level.deskripsi || ''}`.toLowerCase().includes(term));
@@ -25,6 +33,10 @@ export async function findLevels(search = '') {
     GROUP BY l.id ORDER BY l.id`, [search.trim()])).rows;
 }
 export async function findLevel(id) { return (await findLevels()).find((x) => String(x.id) === String(id)) || null; }
+export async function generateLevelCode() {
+  if (useTestStore) return nextLevelCode(test.levels);
+  return nextLevelCode((await query(`SELECT kode FROM levels WHERE kode ILIKE 'LVL-%'`)).rows);
+}
 export async function saveLevel(id, item) {
   const ids = [...new Set(item.action_ids.map(Number))];
   if (useTestStore) {

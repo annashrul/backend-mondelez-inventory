@@ -1,4 +1,4 @@
-import { create, findAll, findById, remove, update } from '../repositories/barangRepository.js';
+import { create, findAll, findById, generateCode, remove, update } from '../repositories/barangRepository.js';
 import { HttpError } from '../middleware/errors.js';
 import { embedImage } from '../services/aiService.js';
 import { deleteProductImage, uploadProductImage } from '../services/imageStorage.js';
@@ -45,6 +45,10 @@ function mapDatabaseError(error) {
 
 export async function listBarang(req, res) {
   res.json(paginated(await findAll(String(req.query.search || '')), req.query));
+}
+
+export async function generateBarangCode(req, res) {
+  res.json({ kode: await generateCode() });
 }
 
 export async function getBarang(req, res) {

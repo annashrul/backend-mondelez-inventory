@@ -123,6 +123,38 @@ export async function verifyRackForBarang(qrCode, barangId) {
   return { status: 'wrong-rack', barang: barang.rows[0], rack: rack.rows[0] };
 }
 
+export async function listBarangByRackQr(qrCode) {
+  if (useTestStore) {
+    const store = await readStore();
+    const rak = store.rak.find((row) => [row.qr_code, row.kode].includes(qrCode));
+    if (!rak) return { status: 'rack-missing' };
+    const barang = store.barang
+      .filter((row) => Number(row.rak_id) === Number(rak.id) && !row.is_deleted)
+      .map((item) => hydrateBarang(item, store));
+    return {
+      status: 'ok',
+      rak: { ...rak, lokasi_detail: store.lokasi.find((row) => row.id === Number(rak.lokasi_id)) || null },
+      barang,
+    };
+  }
+
+  const rack = await query(
+    `SELECT r.*, json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) AS lokasi_detail
+     FROM rak r LEFT JOIN lokasi l ON l.id=r.lokasi_id
+     WHERE r.qr_code=$1 OR r.kode=$1`,
+    [qrCode],
+  );
+  if (!rack.rowCount) return { status: 'rack-missing' };
+  const barang = await query(
+    `SELECT ${barangFields}
+     FROM barang b ${barangJoins}
+     WHERE b.rak_id=$1 AND COALESCE(b.is_deleted, FALSE)=FALSE
+     ORDER BY b.nama ASC`,
+    [rack.rows[0].id],
+  );
+  return { status: 'ok', rak: rack.rows[0], barang: barang.rows };
+}
+
 export async function executePengambilan(payload, operatorId, ip) {
   if (useTestStore) return updateStore((store) => {
     const barang = store.barang.find((row) => row.id === Number(payload.barang_id) && !row.is_deleted);

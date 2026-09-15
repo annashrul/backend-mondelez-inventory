@@ -38,6 +38,14 @@ export const list = (key) => async (req, res, next) => {
   try { res.json(paginated(await repository.findAll(key, String(req.query.search || '')), req.query)); } catch (error) { next(error); }
 };
 
+export const generateCode = (key) => async (req, res, next) => {
+  try {
+    res.json({ kode: await repository.generateCode(key) });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const get = (key) => async (req, res, next) => {
   try {
     const item = await repository.findById(key, Number(req.params.id));

@@ -30,6 +30,7 @@ async function userPayload(body,current={}) {
 }
 
 export const listLevels=async(req,res,next)=>{try{res.json(paginated(await repository.findLevels(String(req.query.search||'')),req.query));}catch(e){next(e);}};
+export const generateLevelCode=async(req,res,next)=>{try{res.json({kode:await repository.generateLevelCode()});}catch(e){next(e);}};
 export const getLevel=async(req,res,next)=>{try{const row=await repository.findLevel(id(req.params.id,'Level ID'));if(!row)throw new HttpError(404,'Level tidak ditemukan');res.json(row);}catch(e){next(e);}};
 export const createLevel=async(req,res,next)=>{try{const row=await repository.saveLevel(null,levelPayload(req.body));await safeLogActivity({req,aksi:'Tambah',modul:'Level Pengguna',detail:`Tambah level: ${row.nama||row.kode}`});res.status(201).json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
 export const updateLevel=async(req,res,next)=>{try{const key=id(req.params.id,'Level ID'),current=await repository.findLevel(key);if(!current)throw new HttpError(404,'Level tidak ditemukan');const row=await repository.saveLevel(key,levelPayload(req.body,current));await safeLogActivity({req,aksi:'Edit',modul:'Level Pengguna',detail:`Edit level: ${row.nama||row.kode}`});res.json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};

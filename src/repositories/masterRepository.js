@@ -4,10 +4,10 @@ import { readStore, updateStore } from '../config/store.js';
 const useTestStore = process.env.NODE_ENV === 'test';
 
 export const masterConfigs = {
-  'kelompok-barang': { table: 'kelompok_barang', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'kelompok_id', 'jumlah_barang'] },
-  satuan: { table: 'satuan', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'satuan_id', 'jumlah_barang'] },
-  lokasi: { table: 'lokasi', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['rak', 'lokasi_id', 'jumlah_rak'] },
-  rak: { table: 'rak', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['barang', 'rak_id', 'jumlah_barang'] }
+  'kelompok-barang': { table: 'kelompok_barang', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'kelompok_id', 'jumlah_barang'], prefix: 'KLP' },
+  satuan: { table: 'satuan', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'satuan_id', 'jumlah_barang'], prefix: 'STN' },
+  lokasi: { table: 'lokasi', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['rak', 'lokasi_id', 'jumlah_rak'], prefix: 'LOK' },
+  rak: { table: 'rak', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['barang', 'rak_id', 'jumlah_barang'], prefix: 'RAK' }
 };
 
 function configFor(key) {
@@ -34,6 +34,25 @@ function addTestCount(key, item, store) {
 function selectSql(key, config) {
   if (key !== 'rak') return withCountSql(config);
   return `${withCountSql(config)}, json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) AS lokasi_detail`;
+}
+
+function nextCodeFromRows(rows, prefix) {
+  const pattern = new RegExp(`^${prefix}-(\\d+)$`, 'i');
+  const max = rows.reduce((highest, row) => {
+    const match = String(row.kode || '').match(pattern);
+    return match ? Math.max(highest, Number(match[1]) || 0) : highest;
+  }, 0);
+  return `${prefix}-${String(max + 1).padStart(3, '0')}`;
+}
+
+export async function generateCode(key) {
+  const config = configFor(key);
+  if (useTestStore) {
+    const store = await readStore();
+    return nextCodeFromRows(store[config.table] || [], config.prefix);
+  }
+  const result = await query(`SELECT kode FROM ${config.table} WHERE kode ILIKE $1`, [`${config.prefix}-%`]);
+  return nextCodeFromRows(result.rows, config.prefix);
 }
 
 export async function findAll(key, search = '') {
