@@ -13,6 +13,7 @@ import { verifyToken } from '../services/authService.js';
 import { safeLogActivity } from '../services/activityLogger.js';
 import { createPengambilanNotification } from '../services/notificationService.js';
 import { paginated } from '../utils/pagination.js';
+import { applyImageSearchGate, imageSearchConfig } from '../utils/imageSearchGate.js';
 
 function id(value, label) {
   const parsed = Number(value);
@@ -45,9 +46,18 @@ async function operatorId(req) {
 export async function searchImage(req, res, next) {
   try {
     const embedding = await embedImageSource(req.body?.image);
-    const results = await searchBarangByImageEmbedding(embedding.embedding, limit(req.body?.limit));
-    if (!results.length) throw new HttpError(404, 'Belum ada barang dengan image embedding');
-    await safeLogActivity({ req, aksi: 'Cari', modul: 'AI Search Barang', detail: `Pencarian gambar menghasilkan ${results.length} kandidat` });
+    const { pool } = imageSearchConfig();
+    // Ambil pool kandidat yang lebih lebar dari hasil akhir; penyaringan memakai
+    // ambang jarak dilakukan setelahnya (lihat utils/imageSearchGate.js).
+    // Filter `model: embedding.model` mencegah perbandingan dengan embedding
+    // lama yang dibuat memakai pipeline preprocessing berbeda.
+    const candidates = await searchBarangByImageEmbedding(embedding.embedding, {
+      pool,
+      model: embedding.model,
+    });
+    if (!candidates.length) throw new HttpError(404, 'Belum ada barang dengan image embedding yang cocok dengan model AI aktif');
+    const results = applyImageSearchGate(candidates, limit(req.body?.limit));
+    await safeLogActivity({ req, aksi: 'Cari', modul: 'AI Search Barang', detail: `Pencarian gambar: ${candidates.length} kandidat, ${results.length} lolos ambang` });
     res.json({ model: embedding.model, results });
   } catch (error) {
     next(error);

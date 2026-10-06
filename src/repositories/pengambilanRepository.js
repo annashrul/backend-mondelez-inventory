@@ -51,22 +51,26 @@ function hydrateHistory(item, store) {
   };
 }
 
-export async function searchBarangByImageEmbedding(embedding, limit) {
+export async function searchBarangByImageEmbedding(embedding, { pool = 12, model = null } = {}) {
   if (useTestStore) {
     const store = await readStore();
-    return store.barang.slice(0, limit).map((item, index) => ({
+    return store.barang.slice(0, pool).map((item, index) => ({
       ...hydrateBarang(item, store),
-      confidence: Math.max(0.91 - index * 0.09, 0.55),
+      // Jarak cosine sintetis: kandidat pertama paling dekat, sisanya makin jauh
+      // supaya gating (lihat utils/imageSearchGate.js) tetap bisa diuji.
+      distance: 0.1 + index * 0.06,
     }));
   }
   const result = await query(
     `WITH q AS (SELECT $1::extensions.vector AS embedding)
-     SELECT ${barangFields}, GREATEST(0, LEAST(1, 1 - (b.embedding <=> q.embedding))) AS confidence
+     SELECT ${barangFields},
+            (b.embedding <=> q.embedding) AS distance
      FROM barang b ${barangJoins}, q
      WHERE b.embedding IS NOT NULL AND COALESCE(b.is_deleted, FALSE)=FALSE
+       AND ($3::text IS NULL OR b.embedding_model = $3)
      ORDER BY b.embedding <=> q.embedding
      LIMIT $2`,
-    [JSON.stringify(embedding), limit],
+    [JSON.stringify(embedding), pool, model || null],
   );
   return result.rows;
 }
