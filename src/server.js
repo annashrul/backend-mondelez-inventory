@@ -60,8 +60,13 @@ for (const endpoint of ['kelompok-barang', 'satuan', 'lokasi', 'rak']) {
 app.use(notFound);
 app.use(errorHandler);
 
+const host = process.env.HOST || '127.0.0.1';
+
 if (process.env.NODE_ENV !== 'test') {
-  server.listen(port, () => console.log(`Inventory API berjalan di http://localhost:${port}/api/v1`));
+	server.listen(port, host, () => {
+	  console.log(`Inventory API berjalan di http://${host}:${port}/api/v1`);
+	});
+
 }
 
 export default app;
