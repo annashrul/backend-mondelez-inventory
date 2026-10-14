@@ -95,12 +95,42 @@ inventory-modelez/
 
 ## Log request API
 
-Jalankan `npm run dev` atau `npm start` dan lihat terminal backend. Setiap request `/api/v1` menghasilkan satu baris JSON berisi waktu UTC, method, path, status HTTP, durasi dalam milidetik, dan request ID. Header respons `X-Request-Id` dapat dicocokkan dengan `request_id` pada log.
+Jalankan `npm run dev` atau `npm start` dan lihat terminal backend. Pada VPS systemd, gunakan `journalctl -u backend-inventory -f -o cat`. Setiap request `/api/v1` dicatat setelah respons selesai, atau ketika koneksi dibatalkan. Header respons `X-Request-Id` cocok dengan request ID pada log.
 
-Contoh:
+Konfigurasi (dibaca saat request API pertama; restart setelah perubahan):
 
-```json
-{"timestamp":"2026-10-14T08:00:00.000Z","level":"info","event":"api_request","request_id":"...","method":"GET","path":"/api/v1/notifications","status":200,"duration_ms":12.34,"aborted":false}
+| Variable | Default | Pilihan |
+| --- | --- | --- |
+| `LOG_FORMAT` | `json` | `pretty`, `json`; nilai tidak valid kembali ke `json` |
+| `LOG_LEVEL` | `info` | `info` (semua), `warn` (4xx/5xx), `error` (5xx saja) |
+| `LOG_SHOW_OPTIONS` | `false` | `true` untuk mencatat OPTIONS sukses; OPTIONS error mengikuti LOG_LEVEL |
+| `LOG_COLOR` | `auto` | `auto` (TTY, bukan TERM=dumb, tanpa NO_COLOR), `always`, `never` |
+
+Pretty menggunakan waktu Asia/Jakarta (WIB), kolom method/path/status/durasi, request ID, dan penanda `aborted=true` jika dibatalkan. Banner ditampilkan sekali per instance logger, saat log pertama yang lolos filter. Padding path minimal 40 karakter; path lebih panjang tetap ditampilkan utuh. Durasi pretty dibulatkan ke milidetik, sementara JSON mempertahankan dua angka desimal.
+
+```text
+MONDELEZ INVENTORY — API REQUESTS
+16:29:03  POST    /api/v1/auth/login                       200   1101ms  id=...
+16:29:04  GET     /api/v1/notifications                    304    619ms  id=...
 ```
 
-Status 4xx dicatat sebagai `warn`, 5xx sebagai `error`. Koneksi yang ditutup sebelum respons selesai dicatat sebagai status log 499 dengan `aborted: true` (bukan respons HTTP yang dikirim). Body, query string, dan header autentikasi tidak dicatat. Log dikirim ke stdout; penyimpanan/rotasi file mengikuti process manager yang menjalankan backend. Setelah mengubah kode, restart backend jika memakai `npm start`.
+JSON mempertahankan nama field dan timestamp UTC:
+
+```json
+{"timestamp":"2026-10-14T09:29:03.503Z","level":"info","event":"api_request","request_id":"...","method":"POST","path":"/api/v1/auth/login","status":200,"duration_ms":1100.62,"aborted":false}
+```
+
+Status 4xx dicatat sebagai `warn`, 5xx sebagai `error`. Koneksi terputus sebelum respons selesai dicatat sebagai status log 499 dengan `aborted: true` (bukan respons HTTP yang dikirim). Pada `LOG_LEVEL=error`, 499 difilter karena termasuk 4xx. Body, query string, cookies, dan header autentikasi tidak dicatat. Karakter kontrol pada path dihapus untuk mencegah pemalsuan baris terminal. Logger tidak membuat file; penyimpanan/rotasi mengikuti journald atau process manager.
+
+Untuk tampilan pretty di VPS, tambahkan konfigurasi berikut pada environment service (EnvironmentFile systemd atau `.env` aplikasi yang digunakan service):
+
+```env
+LOG_FORMAT=pretty
+LOG_LEVEL=info
+LOG_SHOW_OPTIONS=false
+LOG_COLOR=auto
+```
+
+Output service systemd biasanya bukan TTY, sehingga `auto` tidak menambahkan ANSI dan tetap terbaca melalui journalctl. Gunakan `LOG_COLOR=always` jika ingin memaksa warna dan viewer mendukung ANSI, atau `never` untuk selalu tanpa warna.
+
+Setelah kode baru tersedia di VPS, restart dengan `sudo systemctl restart backend-inventory`, periksa `sudo systemctl status backend-inventory`, lalu jalankan `journalctl -u backend-inventory -f -o cat`. Jika mengubah unit/drop-in systemd (bukan hanya EnvironmentFile atau `.env`), jalankan `sudo systemctl daemon-reload` sebelum restart.

@@ -8,3 +8,20 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Runtime data
+data/*.test.json
+
+# Backups
+*.bak
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
