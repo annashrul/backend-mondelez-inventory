@@ -1,3 +1,4 @@
+import { notificationPagination, notificationPage } from '../utils/notificationPagination.js';
 import { query } from '../config/database.js';
 import { readStore, updateStore } from '../config/store.js';
 import { verifyToken } from './authService.js';
@@ -177,7 +178,8 @@ export async function createPengambilanNotification({ transaction, stokAkhir, cr
 
 export async function listNotifications(req) {
   const userId = userIdFromRequest(req);
-  if (!userId) return { rows: [], unread: 0 };
+  const { limit, cursor } = notificationPagination(req.query);
+  if (!userId) return notificationPage([], 0, limit);
 
   if (useTestStore) {
     const store = await readStore();
@@ -185,8 +187,10 @@ export async function listNotifications(req) {
       .filter((row) => Number(row.user_id) === Number(userId))
       .map((row) => ({ ...(store.notifications || []).find((item) => Number(item.id) === Number(row.notification_id)), read_at: row.read_at }))
       .filter((row) => row.id)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    return { rows, unread: rows.filter((row) => !row.read_at).length };
+      .sort((a, b) => BigInt(a.id) > BigInt(b.id) ? -1 : BigInt(a.id) < BigInt(b.id) ? 1 : 0);
+    const unread = rows.filter((row) => !row.read_at).length;
+    const older = cursor ? rows.filter((row) => BigInt(row.id) < BigInt(cursor)) : rows;
+    return notificationPage(older.slice(0, limit + 1), unread, limit);
   }
 
   await ensureSchema();
@@ -194,12 +198,16 @@ export async function listNotifications(req) {
     `SELECT n.id,n.type,n.title,n.message,n.data,n.created_by,n.created_at,r.read_at
      FROM notification_recipients r
      JOIN notifications n ON n.id=r.notification_id
-     WHERE r.user_id=$1
-     ORDER BY n.created_at DESC
-     LIMIT 30`,
+     WHERE r.user_id=$1 AND ($2::bigint IS NULL OR n.id < $2::bigint)
+     ORDER BY n.id DESC
+     LIMIT $3`,
+    [userId, cursor, limit + 1],
+  );
+  const count = await query(
+    'SELECT COUNT(*)::integer AS unread FROM notification_recipients WHERE user_id=$1 AND read_at IS NULL',
     [userId],
   );
-  return { rows: result.rows, unread: result.rows.filter((row) => !row.read_at).length };
+  return notificationPage(result.rows, Number(count.rows[0].unread), limit);
 }
 
 export async function markNotificationsRead(req, notificationId = null) {
