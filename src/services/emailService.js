@@ -64,3 +64,24 @@ export async function sendPengambilanEmail(users, transaction, stokAkhir) {
   if (process.env.NODE_ENV === 'test') return { sent: 0, skipped: true };
   return send(users, transaction, stokAkhir);
 }
+
+export function createTestEmailSender({ env = process.env, createTransport = nodemailer.createTransport } = {}) {
+  let transport;
+  return async (email) => {
+    if (recipientEmails([{ email }]).length !== 1) throw Object.assign(new Error('Alamat email tidak valid'), { code: 'INVALID_EMAIL' });
+    transport ||= createTransport(smtpConfig(env));
+    const result = await transport.sendMail({
+      from: env.SMTP_FROM || env.SMTP_USER,
+      to: email,
+      subject: 'Uji Notifikasi Email — Mondelez Inventory',
+      text: 'Ini adalah email uji notifikasi Mondelez Inventory.\n\nKonfigurasi pengiriman email berhasil digunakan. Email ini tidak membuat transaksi pengambilan barang.\n\nSilakan aktifkan Notifikasi Email dan simpan penerima untuk pengiriman otomatis saat pengambilan barang.',
+    });
+    return { sent: result.accepted?.length || 0 };
+  };
+}
+
+const sendTest = createTestEmailSender();
+export async function sendTestEmail(email) {
+  if (process.env.NODE_ENV === 'test') return { sent: 0, skipped: true };
+  return sendTest(email);
+}

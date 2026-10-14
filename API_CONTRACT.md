@@ -257,3 +257,7 @@ dari `<menu.key>.<action.key>` dan tidak perlu didefinisikan ulang di form.
 ### Notifikasi email
 
 `GET/PUT /api/v1/notifications/settings` mendukung `{ level_ids, user_ids, email_enabled }`. `email_enabled` default `false` dan harus boolean. PUT dari client lama yang tidak menyertakan field ini mempertahankan nilai tersimpan. Ketika aktif, pengambilan barang sukses memicu email SMTP ke alamat email pengguna aktif yang dipilih, selain notifikasi realtime. Kegagalan SMTP dicatat tanpa membatalkan transaksi.
+
+### Kirim email uji
+
+`POST /api/v1/notifications/test-email` dengan bearer token valid dan body `{ "email": "nama@example.com" }`. Pengguna harus aktif dengan permission `pengaturan.read`, `pengaturan.update`, atau `*`. Mengirim email uji tanpa transaksi dan tanpa bergantung pada toggle email. Sukses: `{ "sent": true, "message": "Email uji diterima server SMTP. Periksa inbox atau spam." }`. Status error: 401/403 untuk akses, 422 untuk alamat tidak valid, 429 untuk lebih dari satu percobaan per menit per user, 503 untuk SMTP belum lengkap, 502 untuk kegagalan SMTP. Limit disimpan dalam memori per proses.
