@@ -18,8 +18,8 @@ export async function verifyPassword(password, stored) {
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
-export function createToken(user) {
-  const payload = Buffer.from(JSON.stringify({ sub: String(user.id), exp: Math.floor(Date.now() / 1000) + Number(process.env.AUTH_TOKEN_TTL_SECONDS || 28800) })).toString('base64url');
+export function createToken(user, sessionId) {
+  const payload = Buffer.from(JSON.stringify({ sub: String(user.id), ...(sessionId ? { sid: sessionId } : {}), exp: Math.floor(Date.now() / 1000) + Number(process.env.AUTH_TOKEN_TTL_SECONDS || 28800) })).toString('base64url');
   const signature = createHmac('sha256', secret).update(payload).digest('base64url');
   return `${payload}.${signature}`;
 }

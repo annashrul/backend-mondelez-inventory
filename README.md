@@ -144,3 +144,19 @@ Di Pengaturan → Notifikasi, aktifkan Notifikasi Email, pilih level/user peneri
 Email dikirim setelah transaksi pengambilan dan notifikasi aplikasi tersimpan, berisi nomor referensi, barang, jumlah, pengambil, operator, rak, dan stok akhir. SMTP memiliki timeout. Kegagalan email tidak membatalkan transaksi; periksa event `notification_email` pada log backend untuk hasil atau kode error. Tidak ada retry/outbox persisten untuk email gagal. Mode test tidak mengirim email sungguhan.
 
 Untuk memasang perubahan di VPS, install dependency dengan `npm ci`, pastikan konfigurasi SMTP tersedia pada environment backend, restart service, dan deploy perubahan frontend. Kredensial SMTP hanya disimpan di backend.
+
+## Pengaturan aplikasi
+
+Semua tab Pengaturan membaca/mengubah data backend. Profil perusahaan, tema, bahasa, ukuran halaman, backup, dan keamanan disimpan pada `app_settings`; toggle email/transaksi/stok minimum dan penerima tetap pada `notification_settings`. Penyimpanan per bagian memakai merge JSON agar perubahan satu tab tidak menghapus nilai tab lainnya. Endpoint `GET /api/v1/settings` memerlukan permission `pengaturan.read`, dan PUT per bagian memerlukan `pengaturan.update`. Runtime publik hanya mengekspos profil perusahaan dan preferensi tampilan/timeout.
+
+Frontend memakai URL seperti `/pengaturan?tab=notifikasi`; refresh, link langsung, dan Back/Forward mempertahankan tab. Tema, bahasa kontrol/navigasi, jumlah item pada tabel/activity feed, judul perusahaan dan cetakan diterapkan dari database. Perubahan runtime disiarkan lewat socket ke pengguna yang terhubung. Isi data transaksi dan nama barang tetap sebagaimana tersimpan. Pengaturan perusahaan juga dipakai pada email pengambilan.
+
+Toggle transaksi mengendalikan notifikasi pengambilan/adjustment. Toggle stok minimum memicu alert saat stok melintasi batas minimum dari atas, bukan berulang untuk setiap pengurangan ketika stok sudah rendah. Email pengambilan tetap dikendalikan toggle email secara terpisah.
+
+Timeout sesi: setiap login baru membuat `auth_sessions` di database; permintaan pengguna aktif memperbarui last_seen. Sesi idle ditolak setelah `session_timeout` menit, dan logout menghapus sesi. Frontend juga logout saat idle dan menyinkronkan antar-tab. Heartbeat hanya dikirim saat interaksi pengguna, maksimal satu menit sekali; tidak ada polling idle. Token lama tanpa session ID tetap mengikuti expiry token semula sampai login ulang.
+
+Verifikasi admin: saat `two_factor` aktif, login admin mengirim kode email 6 digit, berlaku 5 menit, maksimal 5 percobaan, sekali pakai. Token baru diterbitkan sesudah verifikasi. Permintaan kode dibatasi satu menit per akun, dan OTP hanya disimpan sebagai hash pada `login_challenges`. Konfigurasi SMTP dan email semua admin aktif wajib tersedia sebelum mengaktifkan. Pastikan email admin dapat menerima pesan sebelum mengaktifkan.
+
+Backup otomatis default OFF. Untuk mengaktifkannya, pasang PostgreSQL client (`pg_dump`) dengan versi yang mendukung server database; atur `BACKUP_DIR` bila perlu. Saat ON, scheduler memeriksa tiap 5 menit dan membuat maksimal satu backup per tanggal WIB. File custom-format tersimpan di direktori server dengan mode 600; tujuh snapshot terbaru dipertahankan. Status/kegagalan backup disimpan ke database dan tampil pada tab Database. Backup gagal dicoba kembali setelah satu jam. Backup manual tersedia lewat tombol Backup Sekarang. Database connection menggunakan DIRECT_URL bila ada, lalu DATABASE_URL. File backup tetap lokal VPS; belum disalin ke penyimpanan eksternal.
+
+Tabel baru dibuat otomatis mengikuti pola service existing. Setelah deploy, restart backend dan deploy frontend; tidak ada perubahan port, host, atau Cloudflare Tunnel. Mode demo mendukung preferensi tampilan tetapi tidak mengklaim menjalankan backup/OTP email sungguhan.

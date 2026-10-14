@@ -43,6 +43,8 @@ async function ensureSchema() {
 function normalizeSetting(value = {}) {
   return {
     email_enabled: value.email_enabled === true,
+    stock_enabled: value.stock_enabled !== false,
+    transaction_enabled: value.transaction_enabled !== false,
     level_ids: Array.isArray(value.level_ids) ? value.level_ids.map(Number).filter(Boolean) : [],
     user_ids: Array.isArray(value.user_ids) ? value.user_ids.map(Number).filter(Boolean) : [],
   };
@@ -85,10 +87,10 @@ export async function getNotificationSetting() {
 }
 
 export async function saveNotificationSetting(value) {
-  if (value.email_enabled !== undefined && typeof value.email_enabled !== 'boolean') {
+  if (['email_enabled', 'stock_enabled', 'transaction_enabled'].some(key => value[key] !== undefined && typeof value[key] !== 'boolean')) {
     throw new HttpError(422, 'Status notifikasi email harus boolean');
   }
-  const current = value.email_enabled === undefined ? await getNotificationSetting() : {};
+  const current = await getNotificationSetting();
   const setting = normalizeSetting({ ...current, ...value });
   if (useTestStore) {
     await updateStore((store) => {
@@ -136,61 +138,58 @@ function emitToUser(userId, notification) {
   ioInstance?.to(`user:${Number(userId)}`).emit('notification:new', notification);
 }
 
-export async function createPengambilanNotification({ transaction, stokAkhir, createdBy }, { sendEmail = sendPengambilanEmail } = {}) {
+async function persistNotification({ recipients, type, title, message, data, createdBy }) {
+  let notification;
+  if (useTestStore) {
+    await updateStore(store => {
+      store.notifications ||= []; store.notification_recipients ||= [];
+      const id = Math.max(0, ...store.notifications.map(row => Number(row.id) || 0)) + 1;
+      notification = { id, type, title, message, data, created_by: createdBy, created_at: new Date().toISOString(), read_at: null };
+      store.notifications.unshift(notification);
+      recipients.forEach(userId => store.notification_recipients.unshift({ notification_id: id, user_id: userId, read_at: null }));
+    });
+  } else {
+    await ensureSchema();
+    const result = await query(`INSERT INTO notifications(type,title,message,data,created_by)
+      VALUES($1,$2,$3,$4::jsonb,$5) RETURNING id,type,title,message,data,created_by,created_at`, [type,title,message,JSON.stringify(data),createdBy]);
+    notification = { ...result.rows[0], read_at: null };
+    await query(`INSERT INTO notification_recipients(notification_id,user_id)
+      SELECT $1, unnest($2::bigint[]) ON CONFLICT DO NOTHING`, [notification.id,recipients]);
+  }
+  recipients.forEach(userId => emitToUser(userId,notification));
+  return notification;
+}
+export async function createPengambilanNotification({ transaction, stokAkhir, createdBy, adjustment = false }, { sendEmail = sendPengambilanEmail } = {}) {
   const setting = await getNotificationSetting();
   const users = await resolveRecipientUsers(setting);
   const recipients = users.map(user => Number(user.id));
   if (!recipients.length) return null;
-
   const barang = transaction.barang_detail || {};
   const operator = transaction.operator_detail || {};
-  const title = 'Pengambilan barang baru';
-  const message = `${operator.nama || operator.username || 'Operator'} memproses ${barang.nama || 'barang'} sebanyak ${transaction.qty} untuk ${transaction.pemohon}`;
-  const data = {
-    no_ref: transaction.no_ref,
-    transaction_id: transaction.id,
-    barang_id: transaction.barang_id,
-    barang_nama: barang.nama,
-    qty: transaction.qty,
-    pemohon: transaction.pemohon,
-    stok_akhir: stokAkhir,
-  };
-
-  let notification;
-  if (useTestStore) {
-    await updateStore((store) => {
-      store.notifications ||= [];
-      store.notification_recipients ||= [];
-      const id = Math.max(0, ...store.notifications.map((row) => Number(row.id) || 0)) + 1;
-      notification = { id, type: 'pengambilan_barang', title, message, data, created_by: createdBy, created_at: new Date().toISOString(), read_at: null };
-      store.notifications.unshift(notification);
-      recipients.forEach((userId) => store.notification_recipients.unshift({ notification_id: id, user_id: userId, read_at: null }));
-    });
-  } else {
-    await ensureSchema();
-    const result = await query(
-      `INSERT INTO notifications(type,title,message,data,created_by)
-       VALUES('pengambilan_barang',$1,$2,$3::jsonb,$4)
-       RETURNING id,type,title,message,data,created_by,created_at`,
-      [title, message, JSON.stringify(data), createdBy],
-    );
-    notification = { ...result.rows[0], read_at: null };
-    await query(
-      `INSERT INTO notification_recipients(notification_id,user_id)
-       SELECT $1, unnest($2::bigint[])
-       ON CONFLICT DO NOTHING`,
-      [notification.id, recipients],
-    );
+  const data = { no_ref: transaction.no_ref, transaction_id: transaction.id, barang_id: transaction.barang_id,
+    barang_nama: barang.nama, qty: transaction.qty, pemohon: transaction.pemohon, stok_akhir: stokAkhir };
+  let notification = null;
+  if (setting.transaction_enabled) {
+    notification = await persistNotification({ recipients, createdBy, data,
+      type: adjustment ? 'adjustment_stok' : 'pengambilan_barang',
+      title: adjustment ? 'Adjustment stok baru' : 'Pengambilan barang baru',
+      message: adjustment ? `${barang.nama || 'Barang'}: ${transaction.tipe} ${transaction.qty}, saldo ${stokAkhir}`
+        : `${operator.nama || operator.username || 'Operator'} memproses ${barang.nama || 'barang'} sebanyak ${transaction.qty} untuk ${transaction.pemohon}` });
   }
-
-  recipients.forEach((userId) => emitToUser(userId, notification));
-  if (setting.email_enabled) {
+  const minimum = Number(barang.stok_min);
+  const reduced = !adjustment || transaction.tipe === 'Kurang';
+  if (setting.stock_enabled && reduced && Number.isFinite(minimum) && Number(stokAkhir) <= minimum && Number(stokAkhir)+Number(transaction.qty) > minimum) {
+    const alert = await persistNotification({ recipients, createdBy, data, type: 'stok_minimum',
+      title: 'Stok mencapai batas minimum', message: `${barang.nama || 'Barang'} tersisa ${stokAkhir}, batas minimum ${minimum}` });
+    notification ||= alert;
+  }
+  if (setting.email_enabled && !adjustment) {
     try {
       const result = await sendEmail(users, transaction, stokAkhir);
-      console.log(JSON.stringify({ event: 'notification_email', notification_id: notification.id, ...result }));
+      console.log(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, ...result }));
     } catch (error) {
       const code = /^[A-Z0-9_]+$/.test(error.code || '') ? error.code : 'SMTP_ERROR';
-      console.error(JSON.stringify({ event: 'notification_email', notification_id: notification.id, status: 'failed', code }));
+      console.error(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, status: 'failed', code }));
     }
   }
   return notification;

@@ -24,12 +24,12 @@ export function recipientEmails(users) {
     .filter(email => /^[^\s@<>;,]+@[^\s@<>;,]+\.[^\s@<>;,]+$/.test(email)))];
 }
 
-export function pengambilanEmail(transaction, stokAkhir) {
+export function pengambilanEmail(transaction, stokAkhir, company = {}) {
   const clean = value => String(value ?? '-').replace(/[\r\n]/g, ' ');
   return {
-    subject: `Pengambilan barang ${clean(transaction.no_ref)} — Mondelez Inventory`,
+    subject: `Pengambilan barang ${clean(transaction.no_ref)} — ${clean(company.nama_perusahaan || 'Mondelez Inventory')}`,
     text: [
-      'Notifikasi pengambilan barang — Mondelez Inventory',
+      `Notifikasi pengambilan barang — ${clean(company.nama_perusahaan || 'Mondelez Inventory')}`,
       '',
       `No. referensi: ${clean(transaction.no_ref)}`,
       `Barang: ${clean(transaction.barang_detail?.nama)}`,
@@ -39,20 +39,21 @@ export function pengambilanEmail(transaction, stokAkhir) {
       `Rak: ${clean(transaction.rak_detail?.nama)}`,
       `Stok akhir: ${clean(stokAkhir)}`,
       `Keterangan: ${clean(transaction.keterangan || '-')}`,
+      '', clean(company.alamat || ''), clean(company.telepon || ''), clean(company.email || ''),
     ].join('\n'),
   };
 }
 
 export function createPengambilanEmailSender({ env = process.env, createTransport = nodemailer.createTransport } = {}) {
   let transport;
-  return async (users, transaction, stokAkhir) => {
+  return async (users, transaction, stokAkhir, company) => {
     const recipients = recipientEmails(users);
     if (!recipients.length) return { sent: 0, skipped: true };
     transport ||= createTransport(smtpConfig(env));
     const result = await transport.sendMail({
       from: env.SMTP_FROM || env.SMTP_USER,
       bcc: recipients,
-      ...pengambilanEmail(transaction, stokAkhir),
+      ...pengambilanEmail(transaction, stokAkhir, company),
     });
     return { sent: result.accepted?.length || 0, rejected: result.rejected?.length || 0 };
   };
@@ -62,7 +63,7 @@ const send = createPengambilanEmailSender();
 export async function sendPengambilanEmail(users, transaction, stokAkhir) {
   // Integration tests must never send real email.
   if (process.env.NODE_ENV === 'test') return { sent: 0, skipped: true };
-  return send(users, transaction, stokAkhir);
+  return send(users, transaction, stokAkhir, await (await import('./settingsService.js')).getSettings());
 }
 
 export function createTestEmailSender({ env = process.env, createTransport = nodemailer.createTransport } = {}) {
@@ -84,4 +85,15 @@ const sendTest = createTestEmailSender();
 export async function sendTestEmail(email) {
   if (process.env.NODE_ENV === 'test') return { sent: 0, skipped: true };
   return sendTest(email);
+}
+
+export async function sendLoginCode(email, code) {
+  if (process.env.NODE_ENV === 'test') throw new Error('Use a mocked OTP email sender in tests');
+  const transport = nodemailer.createTransport(smtpConfig());
+  try {
+    const result = await transport.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: email,
+      subject: 'Kode Verifikasi Login — Mondelez Inventory',
+      text: `Kode verifikasi login Anda: ${code}\n\nBerlaku 5 menit dan hanya dapat digunakan sekali. Jangan bagikan kode ini.` });
+    if (!result.accepted?.length) throw new Error('SMTP rejected login code');
+  } finally { transport.close(); }
 }

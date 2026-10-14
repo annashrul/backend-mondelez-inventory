@@ -1,3 +1,4 @@
+import { createPengambilanNotification } from '../services/notificationService.js';
 import { HttpError } from '../middleware/errors.js';
 import { createAdjustment, listAdjustments, listKartuStok } from '../repositories/stockRepository.js';
 import { requestUserId, safeLogActivity } from '../services/activityLogger.js';
@@ -40,6 +41,7 @@ export async function postAdjustment(req, res, next) {
       modul: 'Adjustment Stok',
       detail: `${result.adjustment.no_ref}: ${result.adjustment.barang_detail?.nama || 'Barang'} ${result.adjustment.tipe} ${result.adjustment.qty}. Saldo akhir ${result.saldo}`,
     });
+    await createPengambilanNotification({ transaction: result.adjustment, stokAkhir: result.saldo, createdBy: requestUserId(req), adjustment: true });
     res.status(201).json(result.adjustment);
   } catch (error) {
     if (error.code === 'BARANG_NOT_FOUND') return next(new HttpError(404, 'Barang tidak ditemukan atau sudah diarsipkan'));

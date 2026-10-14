@@ -6,3 +6,7 @@ levelRoutes.get('/',controller.listLevels); levelRoutes.get('/kode-otomatis',con
 export const userRoutes=Router();
 userRoutes.get('/',controller.listUsers); userRoutes.get('/:id',controller.getUser); userRoutes.post('/',controller.createUser); userRoutes.put('/:id',controller.updateUser); userRoutes.delete('/:id',controller.deleteUser);
 export const authRoutes=Router(); authRoutes.post('/login',controller.login);
+
+authRoutes.post('/verify-otp',controller.verifyLoginCode);
+authRoutes.post('/logout',controller.logout);
+authRoutes.post('/session',controller.keepSession);

@@ -261,3 +261,17 @@ dari `<menu.key>.<action.key>` dan tidak perlu didefinisikan ulang di form.
 ### Kirim email uji
 
 `POST /api/v1/notifications/test-email` dengan bearer token valid dan body `{ "email": "nama@example.com" }`. Pengguna harus aktif dengan permission `pengaturan.read`, `pengaturan.update`, atau `*`. Mengirim email uji tanpa transaksi dan tanpa bergantung pada toggle email. Sukses: `{ "sent": true, "message": "Email uji diterima server SMTP. Periksa inbox atau spam." }`. Status error: 401/403 untuk akses, 422 untuk alamat tidak valid, 429 untuk lebih dari satu percobaan per menit per user, 503 untuk SMTP belum lengkap, 502 untuk kegagalan SMTP. Limit disimpan dalam memori per proses.
+
+### Pengaturan aplikasi dan keamanan
+
+- `GET /settings`: nilai pengaturan lengkap, permission `pengaturan.read`.
+- `GET /settings/runtime`: profil perusahaan, tema, bahasa, items_per_page, session_timeout; tanpa SMTP atau flag keamanan.
+- `PUT /settings/:section`: section `umum`, `tampilan`, `database`, `keamanan`, permission `pengaturan.update`; hanya field bagian itu yang digabung ke database.
+- `GET /settings/database-status`: koneksi aktual, kemampuan pg_dump, backup terakhir dan status proses.
+- `POST /settings/backup`: membuat backup manual, permission `pengaturan.update`.
+- `PUT /notifications/settings` juga mendukung `stock_enabled` dan `transaction_enabled`, default true.
+- `POST /auth/login` dapat mengembalikan `{ requires_2fa: true, challenge_id, message }` tanpa token jika admin membutuhkan kode email.
+- `POST /auth/verify-otp` menerima `{ challenge_id, code }`, lalu mengembalikan user/token setelah kode valid.
+- `POST /auth/session` memperbarui sesi aktif; `POST /auth/logout` membatalkan sesi.
+
+Tema: light/dark. Bahasa: id/en. items_per_page: integer 5–100. session_timeout: integer 1–1440 menit. Boolean wajib bertipe boolean. Semua perubahan pengaturan diverifikasi sebelum disimpan.

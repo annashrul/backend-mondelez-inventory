@@ -3,7 +3,7 @@ import { readStore, updateStore } from '../config/store.js';
 
 const useTestStore = process.env.NODE_ENV === 'test';
 
-const barangDetailSql = "json_build_object('id',b.id,'kode',b.kode,'nama',b.nama) AS barang_detail";
+const barangDetailSql = "json_build_object('id',b.id,'kode',b.kode,'nama',b.nama,'stok_min',b.stok_min) AS barang_detail";
 const userDetailSql = "json_build_object('id',u.id,'username',u.username,'nama',u.nama) AS user_detail";
 
 function hydrateTransaction(item, store) {

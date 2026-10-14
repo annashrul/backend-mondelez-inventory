@@ -18,7 +18,7 @@ const barangJoins = `LEFT JOIN kelompok_barang k ON k.id=b.kelompok_id
 
 const historyFields = `p.id, p.tanggal, p.no_ref, p.pemohon, p.barang_id, p.rak_id, p.operator_id, p.qr_code,
   p.qty, p.keterangan, p.status, p.created_at,
-  json_build_object('id',b.id,'kode',b.kode,'nama',b.nama) AS barang_detail,
+  json_build_object('id',b.id,'kode',b.kode,'nama',b.nama,'stok_min',b.stok_min) AS barang_detail,
   json_build_object('id',r.id,'kode',r.kode,'nama',r.nama,'qr_code',r.qr_code,'lokasi_id',r.lokasi_id,
     'lokasi_detail', json_build_object('id',l.id,'kode',l.kode,'nama',l.nama)) AS rak_detail,
   json_build_object('id',u.id,'username',u.username,'nama',u.nama) AS operator_detail`;

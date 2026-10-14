@@ -1,4 +1,10 @@
 import cors from 'cors';
+import { setSettingsSocket } from './services/settingsService.js';
+import { sessionMiddleware } from './middleware/session.js';
+import { verifyToken } from './services/authService.js';
+import { validateSession } from './services/securityService.js';
+import settingsRoutes from './routes/settingsRoutes.js';
+import { startBackupScheduler } from './services/backupService.js';
 import { apiLogger } from './middleware/apiLogger.js';
 import express from 'express';
 import http from 'node:http';
@@ -24,21 +30,26 @@ const io = new Server(server, {
   cors: { origin: origins },
 });
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
+  try {
   const userId = userIdFromToken(socket.handshake.auth?.token);
-  if (!userId) return next(new Error('Sesi tidak valid'));
+  if (!userId || !await validateSession(verifyToken(socket.handshake.auth?.token), false)) return next(new Error('Sesi tidak valid'));
   socket.data.userId = userId;
   socket.join(`user:${userId}`);
   return next();
+  } catch { next(new Error('Sesi tidak valid')); }
 });
 setNotificationSocket(io);
+setSettingsSocket(io);
 
 app.disable('x-powered-by');
 app.use(apiLogger);
 app.use(cors({ origin: origins }));
 app.use(express.json({ limit: '1mb' }));
+app.use(sessionMiddleware);
 
 app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', service: 'inventory-backend' }));
+app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/ai', aiRoutes);
@@ -63,6 +74,7 @@ app.use(errorHandler);
 const host = process.env.HOST || '127.0.0.1';
 
 if (process.env.NODE_ENV !== 'test') {
+  startBackupScheduler();
 	server.listen(port, host, () => {
 	  console.log(`Inventory API berjalan di http://${host}:${port}/api/v1`);
 	});
