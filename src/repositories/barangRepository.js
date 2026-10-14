@@ -1,3 +1,4 @@
+import { generateInternalBarcode } from '../utils/barcode.js';
 import { query } from "../config/database.js";
 import { readStore, updateStore } from "../config/store.js";
 
@@ -87,6 +88,17 @@ export async function generateCode() {
   }
   const result = await query("SELECT kode FROM barang WHERE kode ILIKE $1", [`${codePrefix}-%`]);
   return nextCodeFromRows(result.rows);
+}
+
+export async function generateBarcode(makeBarcode = generateInternalBarcode) {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const barcode = makeBarcode();
+    const exists = useTestStore
+      ? (await readStore()).barang?.some(item => item.barcode === barcode)
+      : (await query('SELECT 1 FROM barang WHERE barcode = $1 LIMIT 1', [barcode])).rowCount > 0;
+    if (!exists) return barcode;
+  }
+  throw new Error('Unable to generate an unused barcode');
 }
 
 export async function create(item, image = {}) {

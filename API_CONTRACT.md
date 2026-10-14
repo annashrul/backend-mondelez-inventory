@@ -25,6 +25,10 @@ Setiap entitas memiliki 5 operasi standar:
 ## Entitas & Skema Data
 
 ### 1. Master Barang (`/barang`)
+
+- **GET `/barang/kode-otomatis`** — response `{ kode }` untuk mengisi kode barang pada form.
+- **GET `/barang/barcode-otomatis`** — response `{ barcode }`: barcode internal numerik 13 digit dengan check digit. Kandidat diperiksa terhadap seluruh barcode tersimpan, termasuk barang yang diarsipkan. Endpoint tidak membuat barang atau mereservasi barcode; keunikan tetap diperiksa saat menyimpan barang.
+
 ```json
 {
   "id": 1,

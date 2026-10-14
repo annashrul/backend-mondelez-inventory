@@ -328,3 +328,15 @@ test('CRUD pengguna meng-hash password, login, menolak duplikat, dan melindungi 
   assert.equal((await request(`/pengguna/${created.body.id}`, { method: 'DELETE' })).status, 200);
   assert.equal((await request(`/level-pengguna/${level.body.id}`, { method: 'DELETE' })).status, 200);
 });
+
+test('generate barcode endpoint returns a fresh numeric barcode without saving an item', async () => {
+  const before = (await request('/barang')).body.pagination.total;
+  const generated = await request('/barang/barcode-otomatis');
+  assert.equal(generated.status, 200);
+  assert.match(generated.body.barcode, /^20\d{11}$/);
+  const weighted = [...generated.body.barcode].reduce((sum, digit, index) => sum + Number(digit) * (index % 2 ? 3 : 1), 0);
+  assert.equal(weighted % 10, 0);
+  assert.equal((await request('/barang', undefined)).body.pagination.total, before);
+  const lookup = await request(`/barang?search=${generated.body.barcode}`);
+  assert.equal(lookup.body.data.length, 0);
+});

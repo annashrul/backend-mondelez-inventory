@@ -1,4 +1,4 @@
-import { create, findAll, findById, generateCode, remove, update } from '../repositories/barangRepository.js';
+import { create, findAll, findById, generateBarcode, generateCode, remove, update } from '../repositories/barangRepository.js';
 import { HttpError } from '../middleware/errors.js';
 import { embedImage } from '../services/aiService.js';
 import { deleteProductImage, uploadProductImage } from '../services/imageStorage.js';
@@ -49,6 +49,10 @@ export async function listBarang(req, res) {
 
 export async function generateBarangCode(req, res) {
   res.json({ kode: await generateCode() });
+}
+
+export async function generateBarangBarcode(req, res) {
+  res.json({ barcode: await generateBarcode() });
 }
 
 export async function getBarang(req, res) {
