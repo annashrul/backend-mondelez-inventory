@@ -28,6 +28,37 @@ export async function getBackupStatus() {
   }
   return { backup: await backupMetadata(), backup_available: available, backup_running: running };
 }
+export function pgDumpEnvironment(connection, environment = process.env) {
+  const url = new URL(connection);
+  if (!['postgres:', 'postgresql:'].includes(url.protocol)) throw new Error('Invalid PostgreSQL URL');
+  const values = {
+    PGHOST: url.hostname.replace(/^\[|\]$/g, ''),
+    PGPORT: url.port || '5432',
+    PGDATABASE: decodeURIComponent(url.pathname.slice(1)) || 'postgres',
+    PGUSER: decodeURIComponent(url.username),
+    PGPASSWORD: decodeURIComponent(url.password),
+    PGSSLMODE: url.searchParams.get('sslmode') || 'require',
+    PGCONNECT_TIMEOUT: '10',
+  };
+  for (const [parameter, key] of [['sslrootcert','PGSSLROOTCERT'], ['sslcert','PGSSLCERT'], ['sslkey','PGSSLKEY'], ['options','PGOPTIONS']]) {
+    if (url.searchParams.has(parameter)) values[key] = url.searchParams.get(parameter);
+  }
+  return { ...environment, ...values };
+}
+async function dumpDatabase(target) {
+  const connections = [...new Set([process.env.BACKUP_DATABASE_URL, process.env.DIRECT_URL, process.env.DATABASE_URL].filter(Boolean))];
+  if (!connections.length) throw new Error('Database unavailable');
+  let failure;
+  for (const connection of connections) {
+    try {
+      await execute('pg_dump', ['--no-password', '--format=custom', '--no-owner', '--no-acl', '--file', target], {
+        env: pgDumpEnvironment(connection), timeout: 600000, maxBuffer: 65536,
+      });
+      return;
+    } catch (error) { failure = error; }
+  }
+  throw failure;
+}
 export async function runBackup() {
   if (running) throw new HttpError(409, 'Backup sedang berjalan');
   running = true;
@@ -41,11 +72,7 @@ export async function runBackup() {
     const file = await open(target, 'wx', 0o600); await file.close();
     if (process.env.NODE_ENV === 'test') await copyFile(process.env.DATA_FILE, target);
     else {
-      const connection = process.env.DIRECT_URL || process.env.DATABASE_URL;
-      if (!connection) throw new Error('Database unavailable');
-      await execute('pg_dump', ['--format=custom', '--no-owner', '--no-acl', '--file', target], {
-        env: { ...process.env, PGDATABASE: connection }, timeout: 600000, maxBuffer: 65536,
-      });
+      await dumpDatabase(target);
     }
     await chmod(target, 0o600);
     const status = { status: 'success', timestamp, filename };

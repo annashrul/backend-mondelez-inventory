@@ -16,7 +16,7 @@ await writeFile(process.env.DATA_FILE, JSON.stringify({
 const { defaultSettings, getSettings, saveSettings, validateSettings, setSettingsSocket } = await import('../src/services/settingsService.js');
 const { createSession, validateSession, removeSession, beginLoginChallenge, consumeLoginChallenge } = await import('../src/services/securityService.js');
 const { saveNotificationSetting, createPengambilanNotification } = await import('../src/services/notificationService.js');
-const { runBackup, getBackupStatus, checkScheduledBackup } = await import('../src/services/backupService.js');
+const { runBackup, getBackupStatus, checkScheduledBackup, pgDumpEnvironment } = await import('../src/services/backupService.js');
 const { readStore, updateStore } = await import('../src/config/store.js');
 after(() => rm(directory, { recursive: true, force: true }));
 
@@ -175,4 +175,20 @@ test('concurrent login code requests cannot send two emails for the same account
   assert.equal(sent,1);
   assert.equal(results.filter(result => result.status==='fulfilled').length,1);
   assert.equal(results.find(result => result.status==='rejected').reason.status,429);
+});
+
+
+test('pg_dump receives database fields instead of putting a connection URL into PGDATABASE', () => {
+  const env = pgDumpEnvironment('postgresql://service.user:secret%20password@db.example.test:6543/inventory?sslmode=verify-full&options=-c%20statement_timeout%3D0', { PATH: '/usr/bin' });
+  assert.equal(env.PGHOST,'db.example.test');
+  assert.equal(env.PGPORT,'6543');
+  assert.equal(env.PGDATABASE,'inventory');
+  assert.equal(env.PGUSER,'service.user');
+  assert.equal(env.PGPASSWORD,'secret password');
+  assert.equal(env.PGSSLMODE,'verify-full');
+  assert.equal(env.PGOPTIONS,'-c statement_timeout=0');
+  assert.equal(env.PGCONNECT_TIMEOUT,'10');
+  assert.equal(env.PATH,'/usr/bin');
+  assert.equal(pgDumpEnvironment('postgres://user:password@db.example.test/postgres',{}).PGSSLMODE,'require');
+  assert.throws(() => pgDumpEnvironment('https://example.test'));
 });
