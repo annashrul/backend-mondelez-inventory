@@ -279,3 +279,15 @@ dari `<menu.key>.<action.key>` dan tidak perlu didefinisikan ulang di form.
 - `POST /auth/session` memperbarui sesi aktif; `POST /auth/logout` membatalkan sesi.
 
 Tema: light/dark. Bahasa: id/en. items_per_page: integer 5–100. session_timeout: integer 1–1440 menit. Boolean wajib bertipe boolean. Semua perubahan pengaturan diverifikasi sebelum disimpan.
+
+### Grafik Dashboard
+
+`GET /api/v1/dashboard/stats?days=30` menerima periode `7`, `30`, atau `90` hari (default `30`). Periode mencakup hari ini menurut WIB; hari tanpa transaksi bernilai nol. Response menambahkan `analytics` tanpa menghapus field ringkasan sebelumnya:
+
+- `days`, `startDate`, `endDate` dan `daily: [{ date, pengambilan, masuk, keluar }]`.
+- `pengambilan`: jumlah transaksi dengan status `Disetujui`; `masuk`/`keluar`: jumlah transaksi kartu stok, bukan penjumlahan kuantitas lintas satuan.
+- `popularItems: [{ barang_id, nama, satuan, total_transaksi, total_qty }]`: lima barang dengan pengambilan disetujui terbanyak pada periode terpilih.
+- `categories: [{ kelompok_id, nama, total_barang }]`: distribusi barang aktif saat ini, tidak dibatasi periode transaksi.
+- `statuses: [{ status, total }]`: jumlah permintaan pengambilan per status pada periode terpilih.
+
+Periode selain nilai yang didukung mengembalikan `422`.

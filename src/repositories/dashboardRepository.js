@@ -1,3 +1,4 @@
+import { buildDashboardAnalytics, dashboardAnalyticsFromRows, dashboardRange, wibDate } from '../utils/dashboardAnalytics.js';
 import { query } from '../config/database.js';
 import { readStore } from '../config/store.js';
 
@@ -11,17 +12,19 @@ function hydrateBarang(item, store) {
   };
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats({ days = 30, now = new Date() } = {}) {
+  const range = dashboardRange(days, now);
   if (useTestStore) {
     const store = await readStore();
     const barang = (store.barang || []).filter((item) => !item.is_deleted);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = wibDate(now);
     const kartuStok = [...(store.kartu_stok || [])].sort((a, b) => String(b.tanggal).localeCompare(String(a.tanggal)) || Number(b.id) - Number(a.id));
     const users = store.users || store.pengguna || [];
 
     return {
+      analytics: buildDashboardAnalytics(store, { days, now }),
       totalBarang: barang.length,
-      totalTransaksi: kartuStok.filter((item) => String(item.tanggal || '').slice(0, 10) === today).length,
+      totalTransaksi: kartuStok.filter((item) => wibDate(item.tanggal) === today).length,
       stokMenipis: barang.filter((item) => Number(item.stok) <= Number(item.stok_min)).length,
       nilaiInventory: barang.reduce((total, item) => total + Number(item.stok || 0) * Number(item.harga || 0), 0),
       aktivitasTerbaru: kartuStok.slice(0, 5).map((item) => {
@@ -45,15 +48,15 @@ export async function getDashboardStats() {
     };
   }
 
-  const [summary, activities, lowStock] = await Promise.all([
+  const [summary, activities, lowStock, withdrawals, movements, popular, categories, statuses] = await Promise.all([
     query(
       `SELECT
         COUNT(*)::int AS total_barang,
         COALESCE(SUM(COALESCE(stok,0) * COALESCE(harga,0)),0)::numeric AS nilai_inventory,
         COUNT(*) FILTER (WHERE COALESCE(stok,0) <= COALESCE(stok_min,0))::int AS stok_menipis,
-        (SELECT COUNT(*)::int FROM kartu_stok WHERE tanggal::date = CURRENT_DATE) AS total_transaksi
+        (SELECT COUNT(*)::int FROM kartu_stok WHERE (tanggal::timestamptz AT TIME ZONE 'Asia/Jakarta')::date = $1::date) AS total_transaksi
        FROM barang
-       WHERE COALESCE(is_deleted, FALSE)=FALSE`,
+       WHERE COALESCE(is_deleted, FALSE)=FALSE`, [range.endDate],
     ),
     query(
       `SELECT k.id, k.tanggal, k.tipe, k.no_ref, k.qty, k.keterangan,
@@ -75,10 +78,37 @@ export async function getDashboardStats() {
        ORDER BY b.stok ASC, b.nama ASC
        LIMIT 5`,
     ),
+    query(
+      `SELECT to_char(tanggal::timestamptz AT TIME ZONE 'Asia/Jakarta','YYYY-MM-DD') AS date, COUNT(*)::int AS total
+       FROM pengambilan_barang WHERE tanggal::timestamptz >= $1::timestamptz AND tanggal::timestamptz < $2::timestamptz AND status='Disetujui'
+       GROUP BY 1 ORDER BY 1`, [range.start, range.end],
+    ),
+    query(
+      `SELECT to_char(tanggal::timestamptz AT TIME ZONE 'Asia/Jakarta','YYYY-MM-DD') AS date,
+        COUNT(*) FILTER (WHERE tipe='Masuk')::int AS masuk, COUNT(*) FILTER (WHERE tipe='Keluar')::int AS keluar
+       FROM kartu_stok WHERE tanggal::timestamptz >= $1::timestamptz AND tanggal::timestamptz < $2::timestamptz GROUP BY 1 ORDER BY 1`, [range.start, range.end],
+    ),
+    query(
+      `SELECT p.barang_id, COALESCE(b.nama,'-') AS nama, COALESCE(s.nama,'') AS satuan,
+        COUNT(*)::int AS total_transaksi, COALESCE(SUM(p.qty),0)::numeric AS total_qty
+       FROM pengambilan_barang p LEFT JOIN barang b ON b.id=p.barang_id LEFT JOIN satuan s ON s.id=b.satuan_id
+       WHERE p.tanggal::timestamptz >= $1::timestamptz AND p.tanggal::timestamptz < $2::timestamptz AND p.status='Disetujui'
+       GROUP BY p.barang_id,b.nama,s.nama ORDER BY total_transaksi DESC,p.barang_id LIMIT 5`, [range.start, range.end],
+    ),
+    query(
+      `SELECT b.kelompok_id,k.nama,COUNT(*)::int AS total_barang
+       FROM barang b LEFT JOIN kelompok_barang k ON k.id=b.kelompok_id WHERE COALESCE(b.is_deleted,FALSE)=FALSE
+       GROUP BY b.kelompok_id,k.nama ORDER BY total_barang DESC,b.kelompok_id`,
+    ),
+    query(
+      `SELECT status,COUNT(*)::int AS total FROM pengambilan_barang
+       WHERE tanggal::timestamptz >= $1::timestamptz AND tanggal::timestamptz < $2::timestamptz GROUP BY status`, [range.start, range.end],
+    ),
   ]);
 
   const row = summary.rows[0] || {};
   return {
+    analytics: dashboardAnalyticsFromRows({ dailyWithdrawals: withdrawals.rows, dailyMovements: movements.rows, popularItems: popular.rows, categories: categories.rows, statuses: statuses.rows }, range),
     totalBarang: Number(row.total_barang || 0),
     totalTransaksi: Number(row.total_transaksi || 0),
     stokMenipis: Number(row.stok_menipis || 0),

@@ -340,3 +340,13 @@ test('generate barcode endpoint returns a fresh numeric barcode without saving a
   const lookup = await request(`/barang?search=${generated.body.barcode}`);
   assert.equal(lookup.body.data.length, 0);
 });
+
+test('dashboard chart endpoint accepts supported periods and rejects unsupported ranges', async () => {
+  const result = await request('/dashboard/stats?days=7');
+  assert.equal(result.status, 200);
+  assert.equal(result.body.analytics.days, 7);
+  assert.equal(result.body.analytics.daily.length, 7);
+  assert.equal(result.body.analytics.daily.at(-1).date, result.body.analytics.endDate);
+  assert.ok(Array.isArray(result.body.analytics.categories));
+  assert.equal((await request('/dashboard/stats?days=14')).status, 422);
+});
