@@ -1,4 +1,5 @@
 import cors from 'cors';
+import { apiLogger } from './middleware/apiLogger.js';
 import express from 'express';
 import http from 'node:http';
 import 'dotenv/config';
@@ -33,6 +34,7 @@ io.use((socket, next) => {
 setNotificationSocket(io);
 
 app.disable('x-powered-by');
+app.use(apiLogger);
 app.use(cors({ origin: origins }));
 app.use(express.json({ limit: '1mb' }));
 

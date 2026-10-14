@@ -92,3 +92,15 @@ inventory-modelez/
 │   └── schema.sql         # Database schema + seed
 └── README.md
 ```
+
+## Log request API
+
+Jalankan `npm run dev` atau `npm start` dan lihat terminal backend. Setiap request `/api/v1` menghasilkan satu baris JSON berisi waktu UTC, method, path, status HTTP, durasi dalam milidetik, dan request ID. Header respons `X-Request-Id` dapat dicocokkan dengan `request_id` pada log.
+
+Contoh:
+
+```json
+{"timestamp":"2026-10-14T08:00:00.000Z","level":"info","event":"api_request","request_id":"...","method":"GET","path":"/api/v1/notifications","status":200,"duration_ms":12.34,"aborted":false}
+```
+
+Status 4xx dicatat sebagai `warn`, 5xx sebagai `error`. Koneksi yang ditutup sebelum respons selesai dicatat sebagai status log 499 dengan `aborted: true` (bukan respons HTTP yang dikirim). Body, query string, dan header autentikasi tidak dicatat. Log dikirim ke stdout; penyimpanan/rotasi file mengikuti process manager yang menjalankan backend. Setelah mengubah kode, restart backend jika memakai `npm start`.
