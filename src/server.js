@@ -1,4 +1,5 @@
 import cors from 'cors';
+import { dashboardRealtime } from './middleware/dashboardRealtime.js';
 import { setSettingsSocket } from './services/settingsService.js';
 import { sessionMiddleware } from './middleware/session.js';
 import { verifyToken } from './services/authService.js';
@@ -47,6 +48,7 @@ app.use(apiLogger);
 app.use(cors({ origin: origins }));
 app.use(express.json({ limit: '1mb' }));
 app.use(sessionMiddleware);
+app.use(dashboardRealtime(io));
 
 app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', service: 'inventory-backend' }));
 app.use('/api/v1/settings', settingsRoutes);

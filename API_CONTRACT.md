@@ -291,3 +291,15 @@ Tema: light/dark. Bahasa: id/en. items_per_page: integer 5–100. session_timeou
 - `statuses: [{ status, total }]`: jumlah permintaan pengambilan per status pada periode terpilih.
 
 Periode selain nilai yang didukung mengembalikan `422`.
+
+### Realtime dashboard
+
+Koneksi Socket.IO yang sudah diautentikasi mengirim event `dashboard:updated`
+(tanpa payload) setelah perubahan barang, pengambilan, adjustment, master, atau
+pengguna berhasil disimpan dan respons sukses selesai. Event ini tidak bergantung
+pada pengaturan notifikasi email atau daftar penerima notifikasi. Request gagal,
+GET, dan scan rak tidak mengirim event. Klien mengambil ulang
+`GET /api/v1/dashboard/stats?days=7|30|90` menggunakan sesi pengguna dan filter
+periode yang sedang dipilih. Klien juga refresh setelah socket tersambung kembali,
+saat tab kembali aktif, dan setiap 30 detik selama dashboard terlihat untuk
+menangkap perubahan langsung di database atau pergantian tanggal WIB.
