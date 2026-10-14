@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { pengambilanEmailTemplate, testEmailTemplate, loginEmailTemplate } from './emailTemplates.js';
 
 export function smtpConfig(env = process.env) {
   const port = Number(env.SMTP_PORT || 587);
@@ -27,6 +28,7 @@ export function recipientEmails(users) {
 export function pengambilanEmail(transaction, stokAkhir, company = {}) {
   const clean = value => String(value ?? '-').replace(/[\r\n]/g, ' ');
   return {
+    ...pengambilanEmailTemplate(transaction, stokAkhir, company),
     subject: `Pengambilan barang ${clean(transaction.no_ref)} — ${clean(company.nama_perusahaan || 'Mondelez Inventory')}`,
     text: [
       `Notifikasi pengambilan barang — ${clean(company.nama_perusahaan || 'Mondelez Inventory')}`,
@@ -68,12 +70,13 @@ export async function sendPengambilanEmail(users, transaction, stokAkhir) {
 
 export function createTestEmailSender({ env = process.env, createTransport = nodemailer.createTransport } = {}) {
   let transport;
-  return async (email) => {
+  return async (email, company = {}) => {
     if (recipientEmails([{ email }]).length !== 1) throw Object.assign(new Error('Alamat email tidak valid'), { code: 'INVALID_EMAIL' });
     transport ||= createTransport(smtpConfig(env));
     const result = await transport.sendMail({
       from: env.SMTP_FROM || env.SMTP_USER,
       to: email,
+      ...testEmailTemplate(company),
       subject: 'Uji Notifikasi Email — Mondelez Inventory',
       text: 'Ini adalah email uji notifikasi Mondelez Inventory.\n\nKonfigurasi pengiriman email berhasil digunakan. Email ini tidak membuat transaksi pengambilan barang.\n\nSilakan aktifkan Notifikasi Email dan simpan penerima untuk pengiriman otomatis saat pengambilan barang.',
     });
@@ -84,14 +87,16 @@ export function createTestEmailSender({ env = process.env, createTransport = nod
 const sendTest = createTestEmailSender();
 export async function sendTestEmail(email) {
   if (process.env.NODE_ENV === 'test') return { sent: 0, skipped: true };
-  return sendTest(email);
+  return sendTest(email, await (await import('./settingsService.js')).getSettings());
 }
 
 export async function sendLoginCode(email, code) {
   if (process.env.NODE_ENV === 'test') throw new Error('Use a mocked OTP email sender in tests');
+  const company = await (await import('./settingsService.js')).getSettings();
   const transport = nodemailer.createTransport(smtpConfig());
   try {
     const result = await transport.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: email,
+      ...loginEmailTemplate(code, company),
       subject: 'Kode Verifikasi Login — Mondelez Inventory',
       text: `Kode verifikasi login Anda: ${code}\n\nBerlaku 5 menit dan hanya dapat digunakan sekali. Jangan bagikan kode ini.` });
     if (!result.accepted?.length) throw new Error('SMTP rejected login code');
