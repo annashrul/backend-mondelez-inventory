@@ -253,3 +253,7 @@ dari `<menu.key>.<action.key>` dan tidak perlu didefinisikan ulang di form.
 ### Pagination notifikasi header
 
 `GET /api/v1/notifications?limit=10&cursor=40` mengembalikan `{ rows, unread, pagination: { limit, has_next, next_cursor } }`. Tanpa cursor, ambil halaman terbaru. Kirim `next_cursor` untuk memuat item lebih lama. Urutan berdasarkan ID menurun; cursor berupa string bigint agar ID PostgreSQL tidak kehilangan presisi. Limit default 10, maksimal 100; parameter tidak valid menghasilkan 422. `unread` menghitung seluruh notifikasi belum dibaca pengguna, bukan hanya halaman yang dimuat. Cursor tetap stabil saat notifikasi baru masuk lewat socket.
+
+### Notifikasi email
+
+`GET/PUT /api/v1/notifications/settings` mendukung `{ level_ids, user_ids, email_enabled }`. `email_enabled` default `false` dan harus boolean. PUT dari client lama yang tidak menyertakan field ini mempertahankan nilai tersimpan. Ketika aktif, pengambilan barang sukses memicu email SMTP ke alamat email pengguna aktif yang dipilih, selain notifikasi realtime. Kegagalan SMTP dicatat tanpa membatalkan transaksi.

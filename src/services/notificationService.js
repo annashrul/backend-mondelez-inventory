@@ -1,3 +1,5 @@
+import { HttpError } from '../middleware/errors.js';
+import { sendPengambilanEmail } from './emailService.js';
 import { notificationPagination, notificationPage } from '../utils/notificationPagination.js';
 import { query } from '../config/database.js';
 import { readStore, updateStore } from '../config/store.js';
@@ -40,6 +42,7 @@ async function ensureSchema() {
 
 function normalizeSetting(value = {}) {
   return {
+    email_enabled: value.email_enabled === true,
     level_ids: Array.isArray(value.level_ids) ? value.level_ids.map(Number).filter(Boolean) : [],
     user_ids: Array.isArray(value.user_ids) ? value.user_ids.map(Number).filter(Boolean) : [],
   };
@@ -77,12 +80,16 @@ export async function getNotificationSetting() {
   }
   await ensureSchema();
   const result = await query('SELECT value FROM notification_settings WHERE key=$1', [settingKey]);
-  if (!result.rowCount) return { level_ids: await defaultAdminLevelIds(), user_ids: [] };
+  if (!result.rowCount) return normalizeSetting({ level_ids: await defaultAdminLevelIds(), user_ids: [] });
   return normalizeSetting(result.rows[0].value);
 }
 
 export async function saveNotificationSetting(value) {
-  const setting = normalizeSetting(value);
+  if (value.email_enabled !== undefined && typeof value.email_enabled !== 'boolean') {
+    throw new HttpError(422, 'Status notifikasi email harus boolean');
+  }
+  const current = value.email_enabled === undefined ? await getNotificationSetting() : {};
+  const setting = normalizeSetting({ ...current, ...value });
   if (useTestStore) {
     await updateStore((store) => {
       store.notification_settings ||= {};
@@ -100,23 +107,25 @@ export async function saveNotificationSetting(value) {
   return setting;
 }
 
-export async function resolvePengambilanRecipients() {
-  const setting = await getNotificationSetting();
+async function resolveRecipientUsers(setting) {
   if (useTestStore) {
     const store = await readStore();
     return (store.pengguna || store.users || [])
-      .filter((user) => user.status !== 'Nonaktif')
-      .filter((user) => setting.user_ids.includes(Number(user.id)) || setting.level_ids.includes(Number(user.level_id)))
-      .map((user) => Number(user.id));
+      .filter((user) => user.status === 'Aktif')
+      .filter((user) => setting.user_ids.includes(Number(user.id)) || setting.level_ids.includes(Number(user.level_id)));
   }
   const result = await query(
-    `SELECT DISTINCT u.id
+    `SELECT DISTINCT u.id,u.email,u.nama
      FROM users u
      WHERE u.status='Aktif'
        AND (u.id=ANY($1::bigint[]) OR u.level_id=ANY($2::bigint[]))`,
     [setting.user_ids, setting.level_ids],
   );
-  return result.rows.map((row) => Number(row.id));
+  return result.rows;
+}
+
+export async function resolvePengambilanRecipients() {
+  return (await resolveRecipientUsers(await getNotificationSetting())).map(user => Number(user.id));
 }
 
 export function setNotificationSocket(io) {
@@ -127,8 +136,10 @@ function emitToUser(userId, notification) {
   ioInstance?.to(`user:${Number(userId)}`).emit('notification:new', notification);
 }
 
-export async function createPengambilanNotification({ transaction, stokAkhir, createdBy }) {
-  const recipients = await resolvePengambilanRecipients();
+export async function createPengambilanNotification({ transaction, stokAkhir, createdBy }, { sendEmail = sendPengambilanEmail } = {}) {
+  const setting = await getNotificationSetting();
+  const users = await resolveRecipientUsers(setting);
+  const recipients = users.map(user => Number(user.id));
   if (!recipients.length) return null;
 
   const barang = transaction.barang_detail || {};
@@ -173,6 +184,15 @@ export async function createPengambilanNotification({ transaction, stokAkhir, cr
   }
 
   recipients.forEach((userId) => emitToUser(userId, notification));
+  if (setting.email_enabled) {
+    try {
+      const result = await sendEmail(users, transaction, stokAkhir);
+      console.log(JSON.stringify({ event: 'notification_email', notification_id: notification.id, ...result }));
+    } catch (error) {
+      const code = /^[A-Z0-9_]+$/.test(error.code || '') ? error.code : 'SMTP_ERROR';
+      console.error(JSON.stringify({ event: 'notification_email', notification_id: notification.id, status: 'failed', code }));
+    }
+  }
   return notification;
 }
 

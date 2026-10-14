@@ -134,3 +134,13 @@ LOG_COLOR=auto
 Output service systemd biasanya bukan TTY, sehingga `auto` tidak menambahkan ANSI dan tetap terbaca melalui journalctl. Gunakan `LOG_COLOR=always` jika ingin memaksa warna dan viewer mendukung ANSI, atau `never` untuk selalu tanpa warna.
 
 Setelah kode baru tersedia di VPS, restart dengan `sudo systemctl restart backend-inventory`, periksa `sudo systemctl status backend-inventory`, lalu jalankan `journalctl -u backend-inventory -f -o cat`. Jika mengubah unit/drop-in systemd (bukan hanya EnvironmentFile atau `.env`), jalankan `sudo systemctl daemon-reload` sebelum restart.
+
+## Email notifikasi pengambilan barang
+
+Email menggunakan Nodemailer dan SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`). Gmail memakai App Password. Port 587 memakai STARTTLS, port 465 memakai TLS langsung; `SMTP_SECURE` dapat diatur bila diperlukan.
+
+Di Pengaturan → Notifikasi, aktifkan Notifikasi Email, pilih level/user penerima, lalu Simpan. Pengaturan disimpan sebagai `email_enabled` pada setting pengambilan barang. Isi alamat email pengguna melalui Master Pengguna. Hanya pengguna aktif yang dipilih melalui level atau user tambahan menerima email; alamat kosong/tidak valid dilewati dan alamat duplikat digabung. Penerima menggunakan BCC agar alamat mereka tidak saling terlihat.
+
+Email dikirim setelah transaksi pengambilan dan notifikasi aplikasi tersimpan, berisi nomor referensi, barang, jumlah, pengambil, operator, rak, dan stok akhir. SMTP memiliki timeout. Kegagalan email tidak membatalkan transaksi; periksa event `notification_email` pada log backend untuk hasil atau kode error. Tidak ada retry/outbox persisten untuk email gagal. Mode test tidak mengirim email sungguhan.
+
+Untuk memasang perubahan di VPS, install dependency dengan `npm ci`, pastikan konfigurasi SMTP tersedia pada environment backend, restart service, dan deploy perubahan frontend. Kredensial SMTP hanya disimpan di backend.
