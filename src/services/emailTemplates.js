@@ -15,11 +15,11 @@ function layout({ company = {}, title, preview, body }) {
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(preview)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f8;"><tr><td align="center" style="padding:32px 12px;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e4e4ed;border-radius:16px;overflow:hidden;">
-<tr><td bgcolor="#4f2170" style="padding:28px 32px;background:#4f2170;border-radius:16px 16px 0 0;">
-<img src="cid:${logoCid}" width="200" height="67" alt="${name}" style="display:block;width:200px;max-width:100%;height:auto;border:0;color:#ffffff;">
+<tr><td align="center" bgcolor="#4f2170" style="padding:28px 32px;text-align:center;background:#4f2170;border-radius:16px 16px 0 0;">
+<img src="cid:${logoCid}" width="200" height="67" alt="${name}" style="display:block;margin:0 auto;width:200px;max-width:100%;height:auto;border:0;color:#ffffff;">
 <p style="margin:16px 0 0;color:#eadff3;font-size:12px;letter-spacing:2px;">INVENTORY MANAGEMENT</p></td></tr>
-<tr><td style="padding:32px;"><p style="margin:0 0 10px;color:#765489;font-size:12px;font-weight:bold;letter-spacing:1px;">${name}</p>
-<h1 style="margin:0 0 18px;font-size:24px;line-height:1.35;color:#332044;">${escapeHtml(title)}</h1>${body}</td></tr>
+<tr><td style="padding:32px;"><p style="margin:0 0 10px;text-align:center;color:#765489;font-size:12px;font-weight:bold;letter-spacing:1px;">${name}</p>
+<h1 style="margin:0 0 18px;text-align:center;font-size:24px;line-height:1.35;color:#332044;">${escapeHtml(title)}</h1>${body}</td></tr>
 <tr><td style="padding:24px 32px;background:#faf9fc;border-top:1px solid #eeeaf2;border-radius:0 0 16px 16px;">
 <p style="margin:0;color:#565061;font-size:13px;line-height:1.7;font-weight:bold;">${name}</p>
 ${contact ? `<p style="margin:6px 0 0;color:#777080;font-size:12px;line-height:1.7;">${contact}</p>` : ''}
