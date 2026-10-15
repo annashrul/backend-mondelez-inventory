@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numberFormat.js';
 import { pool, query } from '../config/database.js';
 import { readStore, updateStore } from '../config/store.js';
 
@@ -212,7 +213,7 @@ export async function executePengambilan(payload, operatorId, ip) {
     await client.query(
       `INSERT INTO log_activity(user_id,aksi,modul,detail,ip)
        VALUES($1,'Pengambilan','Pengambilan Barang',$2,$3)`,
-      [operatorId, `${noRef}: ${barang.nama} ${payload.qty} ${barang.satuan_nama || ''}; pengambil ${payload.pemohon}; QR ${barang.qr_code}`, ip],
+      [operatorId, `${noRef}: ${barang.nama} ${formatNumber(payload.qty)} ${barang.satuan_nama || ''}; pengambil ${payload.pemohon}; QR ${barang.qr_code}`, ip],
     );
     await client.query('COMMIT');
     const [history] = await query(

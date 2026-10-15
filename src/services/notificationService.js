@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numberFormat.js';
 import { HttpError } from '../middleware/errors.js';
 import { sendPengambilanEmail } from './emailService.js';
 import { notificationPagination, notificationPage } from '../utils/notificationPagination.js';
@@ -173,14 +174,14 @@ export async function createPengambilanNotification({ transaction, stokAkhir, cr
     notification = await persistNotification({ recipients, createdBy, data,
       type: adjustment ? 'adjustment_stok' : 'pengambilan_barang',
       title: adjustment ? 'Adjustment stok baru' : 'Pengambilan barang baru',
-      message: adjustment ? `${barang.nama || 'Barang'}: ${transaction.tipe} ${transaction.qty}, saldo ${stokAkhir}`
-        : `${operator.nama || operator.username || 'Operator'} memproses ${barang.nama || 'barang'} sebanyak ${transaction.qty} untuk ${transaction.pemohon}` });
+      message: adjustment ? `${barang.nama || 'Barang'}: ${transaction.tipe} ${formatNumber(transaction.qty)}, saldo ${formatNumber(stokAkhir)}`
+        : `${operator.nama || operator.username || 'Operator'} memproses ${barang.nama || 'barang'} sebanyak ${formatNumber(transaction.qty)} untuk ${transaction.pemohon}` });
   }
   const minimum = Number(barang.stok_min);
   const reduced = !adjustment || transaction.tipe === 'Kurang';
   if (setting.stock_enabled && reduced && Number.isFinite(minimum) && Number(stokAkhir) <= minimum && Number(stokAkhir)+Number(transaction.qty) > minimum) {
     const alert = await persistNotification({ recipients, createdBy, data, type: 'stok_minimum',
-      title: 'Stok mencapai batas minimum', message: `${barang.nama || 'Barang'} tersisa ${stokAkhir}, batas minimum ${minimum}` });
+      title: 'Stok mencapai batas minimum', message: `${barang.nama || 'Barang'} tersisa ${formatNumber(stokAkhir)}, batas minimum ${formatNumber(minimum)}` });
     notification ||= alert;
   }
   if (setting.email_enabled && !adjustment) {

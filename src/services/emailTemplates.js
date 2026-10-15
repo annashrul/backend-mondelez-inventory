@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numberFormat.js';
 import { readFileSync } from 'node:fs';
 
 const logo = readFileSync(new URL('../assets/email-logo.png', import.meta.url));
@@ -32,9 +33,9 @@ export function pengambilanEmailTemplate(transaction, stokAkhir, company) {
   const unit = transaction.barang_detail?.satuan_detail?.nama || '';
   const fields = [
     ['No. referensi', transaction.no_ref], ['Barang', transaction.barang_detail?.nama],
-    ['Jumlah pengambilan', `${transaction.qty ?? '-'} ${unit}`.trim()],
+    ['Jumlah pengambilan', `${formatNumber(transaction.qty)} ${unit}`.trim()],
     ['Pengambil', transaction.pemohon], ['Operator', transaction.operator_detail?.nama || transaction.operator_detail?.username],
-    ['Rak', transaction.rak_detail?.nama], ['Stok akhir', `${stokAkhir ?? '-'} ${unit}`.trim()],
+    ['Rak', transaction.rak_detail?.nama], ['Stok akhir', `${formatNumber(stokAkhir)} ${unit}`.trim()],
     ['Keterangan', transaction.keterangan || '-'],
   ];
   const rows = fields.map(([label, value]) => `<tr><td width="38%" style="padding:13px 12px;border-bottom:1px solid #eeeaf2;color:#777080;font-size:13px;vertical-align:top;">${escapeHtml(label)}</td><td style="padding:13px 12px;border-bottom:1px solid #eeeaf2;color:#332c3b;font-size:13px;font-weight:bold;line-height:1.6;word-break:break-word;">${escapeHtml(value)}</td></tr>`).join('');

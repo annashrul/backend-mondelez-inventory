@@ -26,3 +26,10 @@ test('test email and OTP use the branded layout with their own instructions', ()
   assert.match(otp.html, /Jangan bagikan/);
   assert.doesNotMatch(otp.html, /Stok akhir/);
 });
+
+test('withdrawal email groups large quantities and balances while preserving identifiers', () => {
+  const result = pengambilanEmailTemplate({ no_ref: 'PIN-001234', qty: 12345, barang_detail: { nama: 'Item', satuan_detail: { nama: 'pcs' } } }, 67890, {});
+  assert.match(result.html, /12\.345 pcs/);
+  assert.match(result.html, /67\.890 pcs/);
+  assert.match(result.html, /PIN-001234/);
+});

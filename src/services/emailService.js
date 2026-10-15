@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numberFormat.js';
 import nodemailer from 'nodemailer';
 import { pengambilanEmailTemplate, testEmailTemplate, loginEmailTemplate } from './emailTemplates.js';
 
@@ -35,11 +36,11 @@ export function pengambilanEmail(transaction, stokAkhir, company = {}) {
       '',
       `No. referensi: ${clean(transaction.no_ref)}`,
       `Barang: ${clean(transaction.barang_detail?.nama)}`,
-      `Jumlah: ${clean(transaction.qty)} ${clean(transaction.barang_detail?.satuan_detail?.nama || '')}`,
+      `Jumlah: ${formatNumber(transaction.qty)} ${clean(transaction.barang_detail?.satuan_detail?.nama || '')}`,
       `Pengambil: ${clean(transaction.pemohon)}`,
       `Operator: ${clean(transaction.operator_detail?.nama || transaction.operator_detail?.username)}`,
       `Rak: ${clean(transaction.rak_detail?.nama)}`,
-      `Stok akhir: ${clean(stokAkhir)}`,
+      `Stok akhir: ${formatNumber(stokAkhir)}`,
       `Keterangan: ${clean(transaction.keterangan || '-')}`,
       '', clean(company.alamat || ''), clean(company.telepon || ''), clean(company.email || ''),
     ].join('\n'),

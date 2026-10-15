@@ -1,3 +1,4 @@
+import { formatNumber } from '../src/utils/numberFormat.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -26,7 +27,7 @@ test('production withdrawal responses include the database unit used by HTML and
     },
     release() {},
   };
-  const repository = new Function('pool', 'query', source + '\nreturn { listPengambilan, executePengambilan };')({ connect: async () => client }, query);
+  const repository = new Function('pool', 'query', 'formatNumber', source + '\nreturn { listPengambilan, executePengambilan };')({ connect: async () => client }, query, formatNumber);
   assert.equal((await repository.listPengambilan())[0].barang_detail.satuan_detail.nama, 'pcs');
   const result = await repository.executePengambilan({ barang_id: 1, rak_id: 2, qr_code: 'RAK:2', pemohon: 'Budi', qty: 1 }, 1, '127.0.0.1');
   assert.equal(reads, 2);

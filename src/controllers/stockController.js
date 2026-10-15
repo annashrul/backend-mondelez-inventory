@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numberFormat.js';
 import { createPengambilanNotification } from '../services/notificationService.js';
 import { HttpError } from '../middleware/errors.js';
 import { createAdjustment, listAdjustments, listKartuStok } from '../repositories/stockRepository.js';
@@ -39,7 +40,7 @@ export async function postAdjustment(req, res, next) {
       req,
       aksi: 'Adjustment',
       modul: 'Adjustment Stok',
-      detail: `${result.adjustment.no_ref}: ${result.adjustment.barang_detail?.nama || 'Barang'} ${result.adjustment.tipe} ${result.adjustment.qty}. Saldo akhir ${result.saldo}`,
+      detail: `${result.adjustment.no_ref}: ${result.adjustment.barang_detail?.nama || 'Barang'} ${result.adjustment.tipe} ${formatNumber(result.adjustment.qty)}. Saldo akhir ${formatNumber(result.saldo)}`,
     });
     await createPengambilanNotification({ transaction: result.adjustment, stokAkhir: result.saldo, createdBy: requestUserId(req), adjustment: true });
     res.status(201).json(result.adjustment);
