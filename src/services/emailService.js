@@ -1,3 +1,4 @@
+import { withdrawalHistoryLink } from '../utils/withdrawalHistoryLink.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import nodemailer from 'nodemailer';
 import { pengambilanEmailTemplate, testEmailTemplate, loginEmailTemplate } from './emailTemplates.js';
@@ -26,15 +27,17 @@ export function recipientEmails(users) {
     .filter(email => /^[^\s@<>;,]+@[^\s@<>;,]+\.[^\s@<>;,]+$/.test(email)))];
 }
 
-export function pengambilanEmail(transaction, stokAkhir, company = {}) {
+export function pengambilanEmail(transaction, stokAkhir, company = {}, env = process.env) {
+  const historyLink = withdrawalHistoryLink(transaction.no_ref, env);
   const clean = value => String(value ?? '-').replace(/[\r\n]/g, ' ');
   return {
-    ...pengambilanEmailTemplate(transaction, stokAkhir, company),
+    ...pengambilanEmailTemplate(transaction, stokAkhir, company, env),
     subject: `Pengambilan barang ${clean(transaction.no_ref)} — ${clean(company.nama_perusahaan || 'Mondelez Inventory')}`,
     text: [
       `Notifikasi pengambilan barang — ${clean(company.nama_perusahaan || 'Mondelez Inventory')}`,
       '',
       `No. referensi: ${clean(transaction.no_ref)}`,
+      ...(historyLink ? [`Lihat riwayat: ${historyLink}`] : []),
       `Barang: ${clean(transaction.barang_detail?.nama)}`,
       `Jumlah: ${formatNumber(transaction.qty)} ${clean(transaction.barang_detail?.satuan_detail?.nama || '')}`,
       `Pengambil: ${clean(transaction.pemohon)}`,
@@ -56,7 +59,7 @@ export function createPengambilanEmailSender({ env = process.env, createTranspor
     const result = await transport.sendMail({
       from: env.SMTP_FROM || env.SMTP_USER,
       bcc: recipients,
-      ...pengambilanEmail(transaction, stokAkhir, company),
+      ...pengambilanEmail(transaction, stokAkhir, company, env),
     });
     return { sent: result.accepted?.length || 0, rejected: result.rejected?.length || 0 };
   };

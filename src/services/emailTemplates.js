@@ -1,3 +1,4 @@
+import { withdrawalHistoryLink } from '../utils/withdrawalHistoryLink.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import { readFileSync } from 'node:fs';
 
@@ -29,7 +30,8 @@ ${contact ? `<p style="margin:6px 0 0;color:#777080;font-size:12px;line-height:1
   };
 }
 
-export function pengambilanEmailTemplate(transaction, stokAkhir, company) {
+export function pengambilanEmailTemplate(transaction, stokAkhir, company, env = process.env) {
+  const historyLink = withdrawalHistoryLink(transaction.no_ref, env);
   const unit = transaction.barang_detail?.satuan_detail?.nama || '';
   const fields = [
     ['No. referensi', transaction.no_ref], ['Barang', transaction.barang_detail?.nama],
@@ -38,11 +40,11 @@ export function pengambilanEmailTemplate(transaction, stokAkhir, company) {
     ['Rak', transaction.rak_detail?.nama], ['Stok akhir', `${formatNumber(stokAkhir)} ${unit}`.trim()],
     ['Keterangan', transaction.keterangan || '-'],
   ];
-  const rows = fields.map(([label, value]) => `<tr><td width="38%" style="padding:13px 12px;border-bottom:1px solid #eeeaf2;color:#777080;font-size:13px;vertical-align:top;">${escapeHtml(label)}</td><td style="padding:13px 12px;border-bottom:1px solid #eeeaf2;color:#332c3b;font-size:13px;font-weight:bold;line-height:1.6;word-break:break-word;">${escapeHtml(value)}</td></tr>`).join('');
+  const rows = fields.map(([label, value]) => `<tr><td width="38%" style="padding:13px 12px;border-bottom:1px solid #eeeaf2;color:#777080;font-size:13px;vertical-align:top;">${escapeHtml(label)}</td><td style="padding:13px 12px;border-bottom:1px solid #eeeaf2;color:#332c3b;font-size:13px;font-weight:bold;line-height:1.6;word-break:break-word;">${label === 'No. referensi' && historyLink ? `<a href="${escapeHtml(historyLink)}" style="color:#4f2170;text-decoration:underline;">${escapeHtml(value)}</a>` : escapeHtml(value)}</td></tr>`).join('');
   return layout({ company, title: 'Notifikasi pengambilan barang', preview: `Pengambilan ${transaction.no_ref ?? '-'} · ${transaction.barang_detail?.nama ?? '-'}`, body: `
 <p style="margin:0 0 24px;font-size:14px;line-height:1.8;color:#625b6b;">Transaksi pengambilan barang telah diproses. Berikut rincian transaksi dan stok setelah pengambilan.</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eeeaf2;border-radius:8px;">${rows}</table>
-<p style="margin:24px 0 0;padding:16px;background:#f4f0f8;border-radius:8px;font-size:13px;line-height:1.7;color:#654879;">Gunakan nomor referensi di atas untuk menelusuri transaksi pada aplikasi inventori.</p>` });
+<p style="margin:24px 0 0;padding:16px;background:#f4f0f8;border-radius:8px;font-size:13px;line-height:1.7;color:#654879;">${historyLink ? 'Klik nomor referensi di atas untuk membuka riwayat pengambilan barang pada aplikasi inventori.' : 'Gunakan nomor referensi di atas untuk menelusuri transaksi pada aplikasi inventori.'}</p>` });
 }
 
 export function testEmailTemplate(company) {
