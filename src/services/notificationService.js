@@ -184,13 +184,17 @@ export async function createPengambilanNotification({ transaction, stokAkhir, cr
     notification ||= alert;
   }
   if (setting.email_enabled && !adjustment) {
-    try {
-      const result = await sendEmail(users, transaction, stokAkhir);
-      console.log(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, ...result }));
-    } catch (error) {
-      const code = /^[A-Z0-9_]+$/.test(error.code || '') ? error.code : 'SMTP_ERROR';
-      console.error(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, status: 'failed', code }));
-    }
+    // The transaction and in-app notifications are already persisted. SMTP
+    // must not delay their successful HTTP response or encourage resubmission.
+    void (async () => {
+      try {
+        const result = await sendEmail(users, transaction, stokAkhir);
+        console.log(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, ...result }));
+      } catch (error) {
+        const code = /^[A-Z0-9_]+$/.test(error?.code || '') ? error.code : 'SMTP_ERROR';
+        console.error(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, status: 'failed', code }));
+      }
+    })();
   }
   return notification;
 }

@@ -68,3 +68,29 @@ test('no selected recipients does not send email', async () => {
   const notification = await createPengambilanNotification(payload, { sendEmail: async () => { throw new Error('Should not send'); } });
   assert.equal(notification, null);
 });
+
+
+test('slow SMTP does not delay a persisted notification or the successful transaction response', async (t) => {
+  await saveNotificationSetting({ level_ids: [1], user_ids: [], email_enabled: true });
+  t.mock.method(console, 'log', () => {});
+  let finishEmail;
+  let completed = false;
+  let timer;
+  const email = new Promise(resolve => { finishEmail = resolve; });
+  try {
+    const notification = await Promise.race([
+      createPengambilanNotification(payload, { sendEmail: async () => {
+        await email;
+        completed = true;
+        return { sent: 1 };
+      } }),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Notification waited for SMTP')), 1000); }),
+    ]);
+    assert.ok(notification.id);
+    assert.equal(completed, false);
+    assert.ok((await readStore()).notifications.some(row => row.id === notification.id));
+    finishEmail();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(completed, true);
+  } finally { clearTimeout(timer); finishEmail(); }
+});
