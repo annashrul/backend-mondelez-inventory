@@ -1,4 +1,5 @@
 import cors from 'cors';
+import { configureTrustedProxy } from './config/trustedProxy.js';
 import { dashboardRealtime } from './middleware/dashboardRealtime.js';
 import { setSettingsSocket } from './services/settingsService.js';
 import { sessionMiddleware } from './middleware/session.js';
@@ -24,6 +25,7 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import { setNotificationSocket, userIdFromToken } from './services/notificationService.js';
 
 const app = express();
+configureTrustedProxy(app);
 const port = Number(process.env.PORT) || 5000;
 const origins = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map((origin) => origin.trim());
 const server = http.createServer(app);

@@ -160,3 +160,13 @@ Verifikasi admin: saat `two_factor` aktif, login admin mengirim kode email 6 dig
 Backup otomatis default OFF. Untuk mengaktifkannya, pasang PostgreSQL client (`pg_dump`) dengan versi yang mendukung server database; atur `BACKUP_DIR` bila perlu. Saat ON, scheduler memeriksa tiap 5 menit dan membuat maksimal satu backup per tanggal WIB. File custom-format tersimpan di direktori server dengan mode 600; tujuh snapshot terbaru dipertahankan. Status/kegagalan backup disimpan ke database dan tampil pada tab Database. Backup gagal dicoba kembali setelah satu jam. Backup manual tersedia lewat tombol Backup Sekarang. Backup mencoba BACKUP_DATABASE_URL bila diatur, lalu DIRECT_URL dan DATABASE_URL. URL dipecah ke PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD; password tidak menjadi argumen proses. pg_dump memakai --no-password agar job otomatis tidak menunggu prompt. File backup tetap lokal VPS; belum disalin ke penyimpanan eksternal.
 
 Tabel baru dibuat otomatis mengikuti pola service existing. Setelah deploy, restart backend dan deploy frontend; tidak ada perubahan port, host, atau Cloudflare Tunnel. Mode demo mendukung preferensi tampilan tetapi tidak mengklaim menjalankan backup/OTP email sungguhan.
+
+### IP klien pada Log Activity
+
+Backend membaca IP melalui `req.ip`. `TRUST_PROXY=loopback` (default)
+mempercayai proxy lokal seperti Cloudflare Tunnel sehingga Express mengambil
+IP klien dari rantai `X-Forwarded-For`, mulai dari sisi proxy terdekat. Koneksi
+dari alamat lain tidak dipercaya. Jika memakai proxy terpisah, isi `TRUST_PROXY`
+dengan IP/subnet proxy tersebut; gunakan `false` untuk koneksi langsung tanpa
+proxy. Proxy harus meneruskan header yang benar. Perubahan ini berlaku untuk
+log baru; IP asli pada log lama tidak dapat dipulihkan dari nilai localhost.
