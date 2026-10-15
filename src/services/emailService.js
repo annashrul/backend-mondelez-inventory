@@ -56,12 +56,29 @@ export function createPengambilanEmailSender({ env = process.env, createTranspor
     const recipients = recipientEmails(users);
     if (!recipients.length) return { sent: 0, skipped: true };
     transport ||= createTransport(smtpConfig(env));
-    const result = await transport.sendMail({
-      from: env.SMTP_FROM || env.SMTP_USER,
-      bcc: recipients,
-      ...pengambilanEmail(transaction, stokAkhir, company, env),
-    });
-    return { sent: result.accepted?.length || 0, rejected: result.rejected?.length || 0 };
+    const message = pengambilanEmail(transaction, stokAkhir, company, env);
+    let sent = 0;
+    let rejected = 0;
+    let lastError;
+    // Send each recipient a direct To header, as in the test email. Separate
+    // messages keep recipient addresses private without using a BCC-only envelope.
+    for (const recipient of recipients) {
+      try {
+        const result = await transport.sendMail({
+          from: env.SMTP_FROM || env.SMTP_USER,
+          to: recipient,
+          ...message,
+        });
+        if (!result.accepted?.length) throw Object.assign(new Error('SMTP rejected notification email'), { code: 'SMTP_REJECTED' });
+        sent += result.accepted.length;
+        rejected += result.rejected?.length || 0;
+      } catch (error) {
+        rejected++;
+        lastError = error;
+      }
+    }
+    if (!sent && lastError) throw lastError;
+    return { sent, rejected };
   };
 }
 
