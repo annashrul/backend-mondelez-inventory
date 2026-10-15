@@ -1,6 +1,8 @@
+import { safeLogActivity } from '../services/activityLogger.js';
+import { settingsChanges } from '../utils/activityDetails.js';
 import { Router } from 'express';
 import { query } from '../config/database.js';
-import { getSettings, saveSettings } from '../services/settingsService.js';
+import { getSettings, saveSettings, settingSections } from '../services/settingsService.js';
 import { settingsAccess } from '../middleware/settingsAccess.js';
 import { smtpConfig, recipientEmails } from '../services/emailService.js';
 import { findUsers } from '../repositories/accessRepository.js';
@@ -25,7 +27,11 @@ router.get('/database-status', settingsAccess(), async (req, res, next) => {
   } catch { res.json({ connected: false, backup: null }); }
 });
 router.post('/backup', settingsAccess('pengaturan.update'), async (req, res, next) => {
-  try { res.json(await runBackup()); } catch (error) { next(error); }
+  try {
+    const result = await runBackup();
+    await safeLogActivity({ req, aksi: 'Backup', modul: 'Pengaturan Database', detail: 'Backup manual selesai' });
+    res.json(result);
+  } catch (error) { next(error); }
 });
 router.put('/:section', settingsAccess('pengaturan.update'), async (req, res, next) => {
   try {
@@ -35,7 +41,10 @@ router.put('/:section', settingsAccess('pengaturan.update'), async (req, res, ne
       const admins = (await findUsers()).filter(user => String(user.level_detail?.nama).toLowerCase() === 'admin' && user.status === 'Aktif');
       if (!admins.length || admins.some(user => !recipientEmails([user]).length)) throw new HttpError(422, 'Isi email semua admin aktif sebelum mengaktifkan verifikasi login');
     }
-    res.json(await saveSettings(req.params.section, req.body));
+    const before = await getSettings({ fresh: true });
+    const result = await saveSettings(req.params.section, req.body);
+    await safeLogActivity({ req, aksi: 'Edit', modul: 'Pengaturan', detail: `${req.params.section}: ${settingsChanges(before, result, settingSections[req.params.section] || [])}` });
+    res.json(result);
   } catch (error) { next(error); }
 });
 export default router;

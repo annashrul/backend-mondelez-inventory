@@ -23,22 +23,16 @@ async function actorName(userId) {
 }
 
 export function requestUserId(req) {
-  const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
-  const payload = token ? verifyToken(token) : null;
+  const token = req?.headers?.authorization?.replace(/^Bearer\s+/i, '');
+  let payload;
+  try { payload = token ? verifyToken(token) : null; } catch { return null; }
   const id = Number(payload?.sub);
   if (Number.isSafeInteger(id) && id > 0) return id;
-  const fallbackId = Number(req.headers['x-user-id']);
-  return Number.isSafeInteger(fallbackId) && fallbackId > 0 ? fallbackId : null;
-}
-
-function requestUserName(req) {
-  const value = req?.headers?.['x-user-name'];
-  return typeof value === 'string' && value.trim() ? value.trim().slice(0, 100) : null;
+  return null;
 }
 
 export async function logActivity({ req, userId, aksi, modul, detail }) {
   const actorId = userId ?? requestUserId(req || {});
-  const actorFallbackName = requestUserName(req);
   const ip = req?.ip || null;
 
   if (useTestStore) {
@@ -54,6 +48,7 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
         ip,
       });
     });
+    if (req) { req.activityLogged = true; req.activityLoggedFailure = String(aksi).startsWith('Gagal') || aksi === 'Ditolak Akses'; }
     return;
   }
 
@@ -66,7 +61,7 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
   }
   if (existingColumns.has('user_name')) {
     columns.unshift('user_name');
-    values.unshift(actorFallbackName || await actorName(actorId));
+    values.unshift(await actorName(actorId));
   }
 
   await query(
@@ -74,11 +69,12 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
      VALUES(${columns.map((_, index) => `$${index + 1}`).join(', ')})`,
     values,
   );
+  if (req) { req.activityLogged = true; req.activityLoggedFailure = String(aksi).startsWith('Gagal') || aksi === 'Ditolak Akses'; }
 }
 
 export function safeLogActivity(payload) {
   return logActivity(payload).catch((error) => {
-    console.error('Gagal mencatat log activity', error);
+    console.error(JSON.stringify({ event: 'activity_log_failed', code: /^[A-Z0-9_]+$/.test(error?.code || '') ? error.code : 'AUDIT_ERROR' }));
   });
 }
 

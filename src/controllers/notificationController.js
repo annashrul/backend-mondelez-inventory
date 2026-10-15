@@ -1,3 +1,5 @@
+import { safeLogActivity } from '../services/activityLogger.js';
+import { settingsChanges } from '../utils/activityDetails.js';
 import { HttpError } from '../middleware/errors.js';
 import {
   getNotificationSetting,
@@ -42,7 +44,10 @@ export async function getSettings(req, res, next) {
 
 export async function updateSettings(req, res, next) {
   try {
-    res.json(await saveNotificationSetting(req.body || {}));
+    const before = await getNotificationSetting();
+    const result = await saveNotificationSetting(req.body || {});
+    await safeLogActivity({ req, aksi: 'Edit', modul: 'Pengaturan Notifikasi', detail: settingsChanges(before, result, ['email_enabled', 'stock_enabled', 'transaction_enabled', 'level_ids', 'user_ids']) });
+    res.json(result);
   } catch (error) {
     next(error);
   }

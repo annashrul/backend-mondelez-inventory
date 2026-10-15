@@ -1,3 +1,4 @@
+import { activityAudit } from './middleware/activityAudit.js';
 import cors from 'cors';
 import { configureTrustedProxy } from './config/trustedProxy.js';
 import { dashboardRealtime } from './middleware/dashboardRealtime.js';
@@ -48,6 +49,7 @@ setSettingsSocket(io);
 app.disable('x-powered-by');
 app.use(apiLogger);
 app.use(cors({ origin: origins }));
+app.use(activityAudit());
 app.use(express.json({ limit: '1mb' }));
 app.use(sessionMiddleware);
 app.use(dashboardRealtime(io));

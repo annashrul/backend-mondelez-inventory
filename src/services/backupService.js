@@ -1,3 +1,4 @@
+import { safeLogActivity } from './activityLogger.js';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdir, readdir, unlink, open, copyFile, chmod } from 'node:fs/promises';
@@ -95,7 +96,15 @@ export async function checkScheduledBackup() {
   const last = await backupMetadata();
   if (last?.status === 'failed' && Date.now()-new Date(last.timestamp).getTime() < 3600000) return;
   const lastDay = last?.status === 'success' ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date(last.timestamp)) : null;
-  if (today !== lastDay) await runBackup();
+  if (today !== lastDay) {
+    try {
+      await runBackup();
+      await safeLogActivity({ aksi: 'Backup', modul: 'Pengaturan Database', detail: 'Backup otomatis selesai' });
+    } catch (error) {
+      await safeLogActivity({ aksi: 'Gagal Backup', modul: 'Pengaturan Database', detail: 'Backup otomatis gagal' });
+      throw error;
+    }
+  }
 }
 export function startBackupScheduler() {
   if (timer || process.env.NODE_ENV === 'test') return;

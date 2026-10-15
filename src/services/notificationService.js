@@ -1,3 +1,4 @@
+import { safeLogActivity } from './activityLogger.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import { HttpError } from '../middleware/errors.js';
 import { sendPengambilanEmail } from './emailService.js';
@@ -164,7 +165,10 @@ export async function createPengambilanNotification({ transaction, stokAkhir, cr
   const setting = await getNotificationSetting();
   const users = await resolveRecipientUsers(setting);
   const recipients = users.map(user => Number(user.id));
-  if (!recipients.length) return null;
+  if (!recipients.length) {
+    if (setting.email_enabled && !adjustment) await safeLogActivity({ userId: createdBy, aksi: 'Lewati Email', modul: 'Notifikasi Email', detail: `${transaction.no_ref}: tidak ada penerima aktif yang dipilih` });
+    return null;
+  }
   const barang = transaction.barang_detail || {};
   const operator = transaction.operator_detail || {};
   const data = { no_ref: transaction.no_ref, transaction_id: transaction.id, barang_id: transaction.barang_id,
@@ -191,9 +195,11 @@ export async function createPengambilanNotification({ transaction, stokAkhir, cr
       try {
         const result = await sendEmail(users, transaction, stokAkhir);
         console.log(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, ...result }));
+        await safeLogActivity({ userId: createdBy, aksi: result.skipped ? 'Lewati Email' : result.sent ? 'Kirim Email' : 'Gagal Kirim Email', modul: 'Notifikasi Email', detail: result.skipped ? `${transaction.no_ref}: tidak ada alamat email penerima yang valid` : `${transaction.no_ref}: diterima SMTP ${result.sent || 0}, ditolak ${result.rejected || 0}` });
       } catch (error) {
         const code = /^[A-Z0-9_]+$/.test(error?.code || '') ? error.code : 'SMTP_ERROR';
         console.error(JSON.stringify({ event: 'notification_email', notification_id: notification?.id || null, status: 'failed', code }));
+        await safeLogActivity({ userId: createdBy, aksi: 'Gagal Kirim Email', modul: 'Notifikasi Email', detail: `${transaction.no_ref}: ${code}` });
       }
     })();
   }

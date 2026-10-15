@@ -116,6 +116,7 @@ export async function execute(req, res, next) {
 
     const actorId = await operatorId(req);
     const response = await executePengambilan(payload, actorId, req.ip);
+    req.activityLogged = true; // The repository records this transaction atomically.
     await createPengambilanNotification({
       transaction: response.transaction,
       stokAkhir: response.stok_akhir,
