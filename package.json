@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "db:migrate": "node scripts/migrate.js",
     "db:verify": "node scripts/verify-database.js",
-    "test": "node --test"
+    "test": "node --test",
+    "db:migrate:search-audit": "node scripts/migrate-search-audit.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

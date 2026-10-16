@@ -1,3 +1,5 @@
+import { searchAudit } from './middleware/searchAudit.js';
+import searchAuditRoutes from './routes/searchAuditRoutes.js';
 import { activityAudit } from './middleware/activityAudit.js';
 import cors from 'cors';
 import { configureTrustedProxy } from './config/trustedProxy.js';
@@ -53,6 +55,8 @@ app.use(activityAudit());
 app.use(express.json({ limit: '1mb' }));
 app.use(sessionMiddleware);
 app.use(dashboardRealtime(io));
+app.use(searchAudit());
+app.use('/api/v1/search-audit', searchAuditRoutes);
 
 app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', service: 'inventory-backend' }));
 app.use('/api/v1/settings', settingsRoutes);
