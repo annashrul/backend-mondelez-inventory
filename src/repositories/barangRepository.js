@@ -1,3 +1,4 @@
+import { rankTextMatches } from '../utils/textSearch.js';
 import { generateInternalBarcode } from '../utils/barcode.js';
 import { query } from "../config/database.js";
 import { readStore, updateStore } from "../config/store.js";
@@ -45,7 +46,8 @@ function assertTestMasterReferences(item, store) {
   if (!valid) throw Object.assign(new Error("master reference missing"), { code: "INVALID_REFERENCE" });
 }
 
-export async function findAll(search = "") {
+export async function findAll(search = "", { fuzzy = false } = {}) {
+  if (fuzzy && search.trim()) return rankTextMatches(await findAll(), search);
   const term = search.trim();
   if (useTestStore) {
     const store = await readStore();

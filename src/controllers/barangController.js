@@ -44,7 +44,7 @@ function mapDatabaseError(error) {
 }
 
 export async function listBarang(req, res) {
-  res.json(paginated(await findAll(String(req.query.search || '')), req.query));
+  res.json(paginated(await findAll(String(req.query.search || ''), { fuzzy: req.query.fuzzy === 'true' }), req.query));
 }
 
 export async function generateBarangCode(req, res) {

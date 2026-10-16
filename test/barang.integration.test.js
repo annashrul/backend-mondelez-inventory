@@ -350,3 +350,31 @@ test('dashboard chart endpoint accepts supported periods and rejects unsupported
   assert.ok(Array.isArray(result.body.analytics.categories));
   assert.equal((await request('/dashboard/stats?days=14')).status, 422);
 });
+
+test('voice fuzzy search ranks spelling matches and keeps archived items out', async () => {
+  const suffix = Date.now();
+  const ids = [];
+  try {
+    for (const [index, nama] of ['Belt VPC', 'Belt PVC'].entries()) {
+      const created = await request('/barang', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ kode: `FUZZ-${suffix}-${index}`, barcode: `FZ${suffix}${index}`, nama,
+          kelompok_id: 2, satuan_id: 1, rak_id: 3, stok: 10, stok_min: 2, harga: 100 }),
+      });
+      assert.equal(created.status, 201);
+      ids.push(created.body.id);
+    }
+    const matches = await request('/barang?search=belt%20pvc&fuzzy=true&limit=100');
+    assert.equal(matches.status, 200);
+    const rows = listData(matches.body);
+    assert.ok(rows.findIndex(row => row.id === ids[1]) < rows.findIndex(row => row.id === ids[0]));
+    assert.ok(rows.some(row => row.id === ids[0]));
+    const strict = listData((await request('/barang?search=belt%20pvc&limit=100')).body);
+    assert.ok(!strict.some(row => row.id === ids[0]));
+    await request(`/barang/${ids[0]}`, { method: 'DELETE' });
+    const archived = listData((await request('/barang?search=belt%20pvc&fuzzy=true&limit=100')).body);
+    assert.ok(!archived.some(row => row.id === ids[0]));
+  } finally {
+    for (const id of ids) await request(`/barang/${id}`, { method: 'DELETE' });
+  }
+});
