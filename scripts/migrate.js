@@ -21,6 +21,7 @@ try {
   await client.query(await readFile(new URL('../migrations/004_english_item_columns.sql', import.meta.url), 'utf8'));
   await client.query(await readFile(new URL('../migrations/005_english_level_location_columns.sql', import.meta.url), 'utf8'));
   await client.query(await readFile(new URL('../migrations/006_english_menu_columns.sql', import.meta.url), 'utf8'));
+  await client.query(await readFile(new URL('../migrations/007_english_rack_columns.sql', import.meta.url), 'utf8'));
   await client.query('COMMIT');
   console.log('Migrasi Supabase berhasil.');
 } catch (error) {

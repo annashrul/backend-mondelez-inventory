@@ -1,3 +1,4 @@
+import { fromPublicRack, toPublicRack } from '../config/rackColumns.js';
 import { fromPublicLocation, toPublicLocation } from '../config/masterColumns.js';
 import { fromPublicGroup, toPublicGroup } from '../config/itemColumns.js';
 import { HttpError } from '../middleware/errors.js';
@@ -12,6 +13,7 @@ function normalize(key, body, current = {}) {
   const config = repository.masterConfigs[key];
   if (key === 'kelompok-barang') body = fromPublicGroup(body);
   if (key === 'lokasi') body = fromPublicLocation(body);
+  if (key === 'rak') body = fromPublicRack(body);
   const item = {};
   for (const field of config.fields) {
     let value = body[field] ?? current[field];
@@ -39,12 +41,12 @@ function mapError(error, key) {
 }
 
 export const list = (key) => async (req, res, next) => {
-  try { res.json(paginated((await repository.findAll(key, String(req.query.search || ''))).map(row => key === 'kelompok-barang' ? toPublicGroup(row) : key === 'lokasi' ? toPublicLocation(row) : row), req.query)); } catch (error) { next(error); }
+  try { res.json(paginated((await repository.findAll(key, String(req.query.search || ''))).map(row => key === 'kelompok-barang' ? toPublicGroup(row) : key === 'lokasi' ? toPublicLocation(row) : key === 'rak' ? toPublicRack(row) : row), req.query)); } catch (error) { next(error); }
 };
 
 export const generateCode = (key) => async (req, res, next) => {
   try {
-    res.json({ [['kelompok-barang','lokasi'].includes(key) ? 'code' : 'kode']: await repository.generateCode(key) });
+    res.json({ [['kelompok-barang','lokasi','rak'].includes(key) ? 'code' : 'kode']: await repository.generateCode(key) });
   } catch (error) {
     next(error);
   }
@@ -54,7 +56,7 @@ export const get = (key) => async (req, res, next) => {
   try {
     const item = await repository.findById(key, Number(req.params.id));
     if (!item) throw new HttpError(404, `${labels[key]} tidak ditemukan`);
-    res.json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : item);
+    res.json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : key === 'rak' ? toPublicRack(item) : item);
   } catch (error) { next(error); }
 };
 
@@ -62,7 +64,7 @@ export const create = (key) => async (req, res, next) => {
   try {
     const item = await repository.create(key, normalize(key, req.body));
     await safeLogActivity({ req, action: 'Tambah', module: modules[key], detail: `Tambah ${labels[key].toLowerCase()}: ${item.nama || item.kode}` });
-    res.status(201).json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : item);
+    res.status(201).json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : key === 'rak' ? toPublicRack(item) : item);
   }
   catch (error) { try { mapError(error, key); } catch (mapped) { next(mapped); } }
 };
@@ -74,7 +76,7 @@ export const update = (key) => async (req, res, next) => {
     if (!current) throw new HttpError(404, `${labels[key]} tidak ditemukan`);
     const item = await repository.update(key, id, normalize(key, req.body, current));
     await safeLogActivity({ req, action: 'Edit', module: modules[key], detail: `Edit ${labels[key].toLowerCase()}: ${item.nama || item.kode}` });
-    res.json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : item);
+    res.json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : key === 'rak' ? toPublicRack(item) : item);
   } catch (error) { try { mapError(error, key); } catch (mapped) { next(mapped); } }
 };
 

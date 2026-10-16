@@ -1,3 +1,4 @@
+import { fromPublicRack } from '../src/config/rackColumns.js';
 import { fromPublicLevel, fromPublicLocation } from '../src/config/masterColumns.js';
 import { fromPublicItem, fromPublicGroup, mapContractResponse } from '../src/config/itemColumns.js';
 import assert from 'node:assert/strict';
@@ -32,7 +33,7 @@ async function request(path, options) {
   const body = /^\/barang(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicItem)
     : /^\/kelompok-barang(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicGroup)
     : /^\/level-pengguna(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicLevel)
-    : /^\/lokasi(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicLocation) : raw;
+    : /^\/lokasi(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicLocation) : /^\/rak(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicRack) : raw;
   return { status: response.status, body };
 }
 

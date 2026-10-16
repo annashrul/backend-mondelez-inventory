@@ -8,20 +8,20 @@ const barangFields = `b.id, b.code AS kode, b.barcode, b.name AS nama,
   b.item_group_id AS kelompok_id, b.unit_id AS satuan_id, b.rack_id AS rak_id,
   json_build_object('id',k.id,'kode',k.code,'nama',k.name) AS kelompok_detail,
   json_build_object('id',s.id,'kode',s.kode,'nama',s.nama) AS satuan_detail,
-  json_build_object('id',r.id,'kode',r.kode,'nama',r.nama,'qr_code',r.qr_code,'lokasi_id',r.lokasi_id,
+  json_build_object('id',r.id,'kode',r.code,'nama',r.name,'qr_code',r.qr_code,'lokasi_id',r.location_id,
     'lokasi_detail', json_build_object('id',l.id,'kode',l.code,'nama',l.name)) AS rak_detail,
   b.stock AS stok, b.min_stock AS stok_min, b.price AS harga, b.image_url, b.embedding_model, (b.embedding IS NOT NULL) AS has_embedding`;
 
 const barangJoins = `LEFT JOIN item_groups k ON k.id=b.item_group_id
   LEFT JOIN units s ON s.id=b.unit_id
   LEFT JOIN racks r ON r.id=b.rack_id
-  LEFT JOIN locations l ON l.id=r.lokasi_id`;
+  LEFT JOIN locations l ON l.id=r.location_id`;
 
 const historyFields = `p.id, p.tanggal, p.no_ref, p.pemohon, p.barang_id, p.rak_id, p.operator_id, p.qr_code,
   p.qty, p.keterangan, p.status, p.created_at,
   json_build_object('id',b.id,'kode',b.code,'nama',b.name,'stok_min',b.min_stock,
     'satuan_detail',json_build_object('id',s.id,'kode',s.kode,'nama',s.nama)) AS barang_detail,
-  json_build_object('id',r.id,'kode',r.kode,'nama',r.nama,'qr_code',r.qr_code,'lokasi_id',r.lokasi_id,
+  json_build_object('id',r.id,'kode',r.code,'nama',r.name,'qr_code',r.qr_code,'lokasi_id',r.location_id,
     'lokasi_detail', json_build_object('id',l.id,'kode',l.code,'nama',l.name)) AS rak_detail,
   json_build_object('id',u.id,'username',u.username,'nama',u.nama) AS operator_detail`;
 
@@ -92,9 +92,9 @@ export async function listPengambilan(search = '') {
      LEFT JOIN items b ON b.id=p.barang_id
      LEFT JOIN units s ON s.id=b.unit_id
      LEFT JOIN racks r ON r.id=p.rak_id
-     LEFT JOIN locations l ON l.id=r.lokasi_id
+     LEFT JOIN locations l ON l.id=r.location_id
      LEFT JOIN users u ON u.id=p.operator_id
-     WHERE $1 = '' OR p.no_ref ILIKE '%' || $1 || '%' OR p.pemohon ILIKE '%' || $1 || '%' OR b.name ILIKE '%' || $1 || '%' OR r.nama ILIKE '%' || $1 || '%'
+     WHERE $1 = '' OR p.no_ref ILIKE '%' || $1 || '%' OR p.pemohon ILIKE '%' || $1 || '%' OR b.name ILIKE '%' || $1 || '%' OR r.name ILIKE '%' || $1 || '%'
      ORDER BY p.created_at DESC, p.id DESC
     `,
     [search.trim()],
@@ -114,14 +114,14 @@ export async function verifyRackForBarang(qrCode, barangId) {
   const result = await query(
     `SELECT ${barangFields}
      FROM items b ${barangJoins}
-     WHERE b.id=$2 AND COALESCE(b.is_deleted, FALSE)=FALSE AND (r.qr_code=$1 OR r.kode=$1)`,
+     WHERE b.id=$2 AND COALESCE(b.is_deleted, FALSE)=FALSE AND (r.qr_code=$1 OR r.code=$1)`,
     [qrCode, barangId],
   );
   if (result.rowCount) return { status: 'ok', barang: result.rows[0], rak: result.rows[0].rak_detail };
 
   const rack = await query(
-    `SELECT r.*, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail
-     FROM racks r JOIN locations l ON l.id=r.lokasi_id WHERE r.qr_code=$1 OR r.kode=$1`,
+    `SELECT r.*, r.code AS kode,r.name AS nama,r.location_id AS lokasi_id,r.capacity AS kapasitas,r.occupied AS terisi, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail
+     FROM racks r JOIN locations l ON l.id=r.location_id WHERE r.qr_code=$1 OR r.code=$1`,
     [qrCode],
   );
   const barang = await query(`SELECT ${barangFields} FROM items b ${barangJoins} WHERE b.id=$1 AND COALESCE(b.is_deleted, FALSE)=FALSE`, [barangId]);
@@ -146,9 +146,9 @@ export async function listBarangByRackQr(qrCode) {
   }
 
   const rack = await query(
-    `SELECT r.*, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail
-     FROM racks r LEFT JOIN locations l ON l.id=r.lokasi_id
-     WHERE r.qr_code=$1 OR r.kode=$1`,
+    `SELECT r.*, r.code AS kode,r.name AS nama,r.location_id AS lokasi_id,r.capacity AS kapasitas,r.occupied AS terisi, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail
+     FROM racks r LEFT JOIN locations l ON l.id=r.location_id
+     WHERE r.qr_code=$1 OR r.code=$1`,
     [qrCode],
   );
   if (!rack.rowCount) return { status: 'rack-missing' };
@@ -185,7 +185,7 @@ export async function executePengambilan(payload, operatorId, ip) {
   try {
     await client.query('BEGIN');
     const locked = await client.query(
-      `SELECT b.*, b.code AS kode, b.name AS nama, b.item_group_id AS kelompok_id, b.unit_id AS satuan_id, b.rack_id AS rak_id, b.stock AS stok, b.min_stock AS stok_min, b.price AS harga, b.description AS deskripsi, r.qr_code, r.kode AS rak_kode, r.nama AS rak_nama, s.nama AS satuan_nama
+      `SELECT b.*, b.code AS kode, b.name AS nama, b.item_group_id AS kelompok_id, b.unit_id AS satuan_id, b.rack_id AS rak_id, b.stock AS stok, b.min_stock AS stok_min, b.price AS harga, b.description AS deskripsi, r.qr_code, r.code AS rak_kode, r.name AS rak_nama, s.nama AS satuan_nama
        FROM items b JOIN racks r ON r.id=b.rack_id LEFT JOIN units s ON s.id=b.unit_id
        WHERE b.id=$1 AND COALESCE(b.is_deleted, FALSE)=FALSE FOR UPDATE OF b`,
       [payload.barang_id],
@@ -222,7 +222,7 @@ export async function executePengambilan(payload, operatorId, ip) {
        LEFT JOIN items b ON b.id=p.barang_id
        LEFT JOIN units s ON s.id=b.unit_id
        LEFT JOIN racks r ON r.id=p.rak_id
-       LEFT JOIN locations l ON l.id=r.lokasi_id
+       LEFT JOIN locations l ON l.id=r.location_id
        LEFT JOIN users u ON u.id=p.operator_id
        WHERE p.id=$1`,
       [transaction.rows[0].id],

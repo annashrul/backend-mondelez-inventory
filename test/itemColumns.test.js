@@ -72,3 +72,19 @@ test('raw menu API returns English columns and keeps stable permission keys and 
   for(const action of menu.actions){assert.ok(!Object.hasOwn(action,'nama'));assert.ok(!Object.hasOwn(action,'urutan'));assert.equal(typeof action.name,'string');assert.equal(typeof action.sort_order,'number');assert.equal(action.permission,`${menu.key}.${action.key}`);}
  }
 });
+
+test('English rack CRUD preserves location links, QR lookup, capacity and protected occupancy',async()=>{
+ const {rackColumnRenames}=await import('../src/config/rackColumns.js');
+ const payload={code:'RAK-ENGLISH',name:'English Rack',location_id:1,capacity:100,occupied:90};
+ const created=await request('/rak','POST',payload);assert.equal(created.status,201);
+ for(const [old,current]of Object.entries(rackColumnRenames.racks)){assert.ok(!Object.hasOwn(created.body,old));assert.ok(Object.hasOwn(created.body,current));}
+ assert.equal(created.body.location_id,1);assert.equal(created.body.capacity,100);assert.equal(created.body.occupied,0);assert.equal(created.body.qr_code,'RAK:RAK-ENGLISH');
+ const edited=await request(`/rak/${created.body.id}`,'PUT',{name:'Updated Rack',capacity:200,location_id:2,occupied:99});assert.equal(edited.status,200);assert.equal(edited.body.capacity,200);assert.equal(edited.body.location_id,2);assert.equal(edited.body.occupied,0);assert.ok(edited.body.lokasi_detail);
+ const found=await request('/rak?search=Updated');assert.ok(found.body.data.some(row=>row.id===created.body.id&&row.name==='Updated Rack'));
+ const code=await request('/rak/kode-otomatis');assert.equal(typeof code.body.code,'string');assert.ok(!Object.hasOwn(code.body,'kode'));
+ assert.equal((await request(`/rak/${created.body.id}`,'PUT',{capacity:-1})).status,422);
+ assert.equal((await request('/rak','POST',{...payload,code:'BAD-LOC',location_id:999999})).status,422);
+ assert.equal((await request('/rak','POST',{...payload,kode:'CONFLICT'})).status,422);
+ assert.equal((await request(`/rak/${created.body.id}`,'DELETE')).status,200);
+ assert.equal((await request(`/rak/${created.body.id}`)).status,404);
+});

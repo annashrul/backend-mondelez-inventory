@@ -195,3 +195,5 @@ The `items` and `item_groups` tables now use English physical columns and Englis
 Level and location column migration: [docs/level-location-columns.md](docs/level-location-columns.md).
 
 Menu column migration: [docs/menu-columns.md](docs/menu-columns.md).
+
+Rack column migration: [docs/rack-columns.md](docs/rack-columns.md).

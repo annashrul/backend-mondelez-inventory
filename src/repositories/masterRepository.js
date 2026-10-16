@@ -1,3 +1,4 @@
+import { rackColumnRenames } from '../config/rackColumns.js';
 import { query } from '../config/database.js';
 import { readStore, updateStore } from '../config/store.js';
 
@@ -6,8 +7,8 @@ const useTestStore = process.env.NODE_ENV === 'test';
 export const masterConfigs = {
   'kelompok-barang': { table: 'item_groups', columns: {kode:'code',nama:'name',deskripsi:'description'}, fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'item_group_id', 'jumlah_barang', 'kelompok_id'], prefix: 'KLP' },
   satuan: { table: 'units', fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'unit_id', 'jumlah_barang', 'satuan_id'], prefix: 'STN' },
-  lokasi: { table: 'locations', columns: {kode:'code',nama:'name',alamat:'address',deskripsi:'description'}, fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['racks', 'lokasi_id', 'jumlah_rak'], prefix: 'LOK' },
-  rak: { table: 'racks', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['items', 'rack_id', 'jumlah_barang', 'rak_id'], prefix: 'RAK' }
+  lokasi: { table: 'locations', columns: {kode:'code',nama:'name',alamat:'address',deskripsi:'description'}, fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['racks', 'location_id', 'jumlah_rak', 'lokasi_id'], prefix: 'LOK' },
+  rak: { table: 'racks', columns: rackColumnRenames.racks, fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['items', 'rack_id', 'jumlah_barang', 'rak_id'], prefix: 'RAK' }
 };
 
 function configFor(key) {
@@ -67,7 +68,7 @@ export async function findAll(key, search = '') {
   }
   return (await query(
     `SELECT ${selectSql(key, config)} FROM ${config.table} m
-     ${key === 'rak' ? 'JOIN locations l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''}
+     ${key === 'rak' ? 'JOIN locations l ON l.id=m.location_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''}
      WHERE COALESCE(m.is_deleted, FALSE)=FALSE
        AND ($1 = '' OR m.${config.columns?.kode || 'kode'} ILIKE '%' || $1 || '%' OR m.${config.columns?.nama || 'nama'} ILIKE '%' || $1 || '%')
      ORDER BY m.id`, [search.trim()]
@@ -81,7 +82,7 @@ export async function findById(key, id) {
     const item = (store[config.table] || []).find((row) => row.id === id && !row.is_deleted);
     return item ? addTestCount(key, item, store) : null;
   }
-  return (await query(`SELECT ${selectSql(key, config)} FROM ${config.table} m ${key === 'rak' ? 'JOIN locations l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''} WHERE m.id=$1 AND COALESCE(m.is_deleted, FALSE)=FALSE`, [id])).rows[0] || null;
+  return (await query(`SELECT ${selectSql(key, config)} FROM ${config.table} m ${key === 'rak' ? 'JOIN locations l ON l.id=m.location_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''} WHERE m.id=$1 AND COALESCE(m.is_deleted, FALSE)=FALSE`, [id])).rows[0] || null;
 }
 
 export async function create(key, item) {

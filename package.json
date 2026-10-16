@@ -19,7 +19,9 @@
     "db:migrate:level-location-columns": "node scripts/migrate-level-location-columns.js",
     "db:check:level-location-columns": "node scripts/check-level-location-columns.js",
     "db:migrate:menu-columns": "node scripts/migrate-menu-columns.js",
-    "db:check:menu-columns": "node scripts/check-menu-columns.js"
+    "db:check:menu-columns": "node scripts/check-menu-columns.js",
+    "db:migrate:rack-columns": "node scripts/migrate-rack-columns.js",
+    "db:check:rack-columns": "node scripts/check-rack-columns.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
