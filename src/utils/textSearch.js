@@ -30,9 +30,13 @@ function fieldScore(field, query) {
   if (!text) return 0;
   if (text === query) return 1;
   if (text.includes(query)) return 0.99;
+  // Speech engines may join product words or insert spaces.
+  if (text.replaceAll(' ', '') === query.replaceAll(' ', '')) return 0.97;
   const available = text.split(' ');
-  const words = query.split(' ');
+  const words = [...new Set(query.split(' '))];
   let total = 0;
+  let matched = 0;
+  let exactWord = false;
   // Match the most specific words first; never reuse a product token.
   for (const word of [...words].sort((a, b) => b.length - a.length)) {
     let best = 0, index = -1;
@@ -40,11 +44,39 @@ function fieldScore(field, query) {
       const score = wordScore(word, candidate);
       if (score > best) { best = score; index = candidateIndex; }
     });
-    if (best < 0.66) return 0;
+    if (best < 0.66) {
+      // Do not suggest a different size or part number as a spelling correction.
+      if (/\d/.test(word)) return 0;
+      // A known product word can anchor either end of a joined utterance:
+      // blockchain -> block / chain, even if only one exists in the catalog.
+      // Require meaningful lengths and consume each part once.
+      let remainder = word;
+      let covered = 0;
+      for (const candidate of [...available].sort((a, b) => b.length - a.length)) {
+        if (candidate.length < 4 || /\d/.test(candidate)) continue;
+        const atStart = remainder.startsWith(candidate);
+        const atEnd = remainder.endsWith(candidate);
+        const restLength = remainder.length - candidate.length;
+        if ((!atStart && !atEnd) || (restLength !== 0 && restLength < 3)) continue;
+        remainder = atStart ? remainder.slice(candidate.length) : remainder.slice(0, -candidate.length);
+        covered += candidate.length;
+        available.splice(available.indexOf(candidate), 1);
+      }
+      if (covered) {
+        total += covered / word.length;
+        exactWord = true;
+      }
+      continue;
+    }
+    matched++;
+    if (best === 1 && word.length >= 3) exactWord = true;
     total += best;
     available.splice(index, 1);
   }
-  return total / words.length * 0.98;
+  if (matched === words.length) return total / words.length * 0.98;
+  // Partial recommendations require an exact meaningful word. Keep all full
+  // spelling matches above partial matches, then rank partials by coverage.
+  return exactWord ? total / words.length * 0.6 : 0;
 }
 
 export function rankTextMatches(items, search) {
@@ -53,6 +85,6 @@ export function rankTextMatches(items, search) {
   return items.filter(item => !item.is_deleted).map(item => ({
     ...item,
     text_similarity: Math.max(...[item.nama, item.kode, item.barcode].map(field => fieldScore(field, query))),
-  })).filter(item => item.text_similarity >= 0.66)
+  })).filter(item => item.text_similarity > 0)
     .sort((a, b) => b.text_similarity - a.text_similarity || Number(a.id) - Number(b.id));
 }

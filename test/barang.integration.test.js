@@ -355,7 +355,7 @@ test('voice fuzzy search ranks spelling matches and keeps archived items out', a
   const suffix = Date.now();
   const ids = [];
   try {
-    for (const [index, nama] of ['Belt VPC', 'Belt PVC'].entries()) {
+    for (const [index, nama] of ['Belt VPC', 'Belt PVC', 'Modular Chain', 'Terminal Block'].entries()) {
       const created = await request('/barang', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ kode: `FUZZ-${suffix}-${index}`, barcode: `FZ${suffix}${index}`, nama,
@@ -369,6 +369,12 @@ test('voice fuzzy search ranks spelling matches and keeps archived items out', a
     const rows = listData(matches.body);
     assert.ok(rows.findIndex(row => row.id === ids[1]) < rows.findIndex(row => row.id === ids[0]));
     assert.ok(rows.some(row => row.id === ids[0]));
+    const partial = listData((await request('/barang?search=block%20chain&fuzzy=true&limit=100')).body);
+    assert.ok(partial.some(row => row.id === ids[2]), 'chain recommends Modular Chain');
+    assert.ok(partial.some(row => row.id === ids[3]), 'block recommends Terminal Block');
+    const compound = listData((await request('/barang?search=blockchain&fuzzy=true&limit=100')).body);
+    assert.ok(compound.some(row => row.id === ids[2]), 'blockchain recommends Modular Chain');
+    assert.ok(compound.some(row => row.id === ids[3]), 'blockchain recommends Terminal Block');
     const strict = listData((await request('/barang?search=belt%20pvc&limit=100')).body);
     assert.ok(!strict.some(row => row.id === ids[0]));
     await request(`/barang/${ids[0]}`, { method: 'DELETE' });
