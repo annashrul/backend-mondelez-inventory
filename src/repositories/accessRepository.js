@@ -24,21 +24,22 @@ function nextLevelCode(rows) {
 export async function findLevels(search = '') {
   const term = search.trim().toLowerCase();
   if (useTestStore) return test.levels.map(levelView).filter((level) => !term || `${level.kode} ${level.nama} ${level.deskripsi || ''}`.toLowerCase().includes(term));
-  return (await query(`SELECT l.*, COUNT(DISTINCT u.id)::int jumlah_user,
+  return (await query(`SELECT l.*, l.code AS kode,l.name AS nama,l.description AS deskripsi,l.access_rights AS hak_akses, COUNT(DISTINCT u.id)::int jumlah_user,
     COALESCE(array_agg(DISTINCT lp.menu_action_id ORDER BY lp.menu_action_id) FILTER (WHERE lp.menu_action_id IS NOT NULL), '{}') action_ids,
     COALESCE(array_agg(DISTINCT m.key || '.' || a.key ORDER BY m.key || '.' || a.key) FILTER (WHERE a.id IS NOT NULL), '{}') permissions
     FROM levels l LEFT JOIN users u ON u.level_id=l.id LEFT JOIN level_permissions lp ON lp.level_id=l.id
     LEFT JOIN menu_actions a ON a.id=lp.menu_action_id LEFT JOIN menus m ON m.id=a.menu_id
-    WHERE $1 = '' OR l.kode ILIKE '%' || $1 || '%' OR l.nama ILIKE '%' || $1 || '%' OR l.deskripsi ILIKE '%' || $1 || '%'
+    WHERE $1 = '' OR l.code ILIKE '%' || $1 || '%' OR l.name ILIKE '%' || $1 || '%' OR l.description ILIKE '%' || $1 || '%'
     GROUP BY l.id ORDER BY l.id`, [search.trim()])).rows;
 }
 export async function findLevel(id) { return (await findLevels()).find((x) => String(x.id) === String(id)) || null; }
 export async function generateLevelCode() {
   if (useTestStore) return nextLevelCode(test.levels);
-  return nextLevelCode((await query(`SELECT kode FROM levels WHERE kode ILIKE 'LVL-%'`)).rows);
+  return nextLevelCode((await query(`SELECT code AS kode FROM levels WHERE code ILIKE 'LVL-%'`)).rows);
 }
 export async function saveLevel(id, item) {
   const ids = [...new Set(item.action_ids.map(Number))];
+  item = { ...item, hak_akses: `${ids.length} permission` };
   if (useTestStore) {
     if (ids.some((x) => !actions.some((a) => a.id === x))) throw Object.assign(new Error('invalid actions'), { code: 'INVALID_ACTIONS' });
     if (test.levels.some((l) => l.id !== id && l.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
@@ -49,10 +50,10 @@ export async function saveLevel(id, item) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const valid = await client.query('SELECT id FROM menu_actions WHERE aktif=TRUE AND id=ANY($1::bigint[])', [ids]);
+    const valid = await client.query('SELECT id FROM menu_actions WHERE is_active=TRUE AND id=ANY($1::bigint[])', [ids]);
     if (valid.rowCount !== ids.length) throw Object.assign(new Error('invalid actions'), { code: 'INVALID_ACTIONS' });
     const values = [item.kode, item.nama, item.deskripsi, `${ids.length} permission`];
-    const result = id ? await client.query('UPDATE levels SET kode=$1,nama=$2,deskripsi=$3,hak_akses=$4 WHERE id=$5 RETURNING id', [...values, id]) : await client.query('INSERT INTO levels(kode,nama,deskripsi,hak_akses) VALUES($1,$2,$3,$4) RETURNING id', values);
+    const result = id ? await client.query('UPDATE levels SET code=$1,name=$2,description=$3,access_rights=$4 WHERE id=$5 RETURNING id', [...values, id]) : await client.query('INSERT INTO levels(code,name,description,access_rights) VALUES($1,$2,$3,$4) RETURNING id', values);
     if (!result.rowCount) { await client.query('ROLLBACK'); return null; }
     id = result.rows[0].id; await client.query('DELETE FROM level_permissions WHERE level_id=$1', [id]);
     if (ids.length) await client.query('INSERT INTO level_permissions(level_id,menu_action_id) SELECT $1,unnest($2::bigint[])', [id, ids]);
@@ -68,7 +69,7 @@ export async function findUsers(search = '') {
   const term = search.trim().toLowerCase();
   if (useTestStore) return test.users.map(userView).filter((user) => !term || `${user.username} ${user.nama} ${user.email || ''}`.toLowerCase().includes(term));
   return (await query(`SELECT u.id,u.username,u.nama,u.email,u.level_id,u.status,u.created_at,u.updated_at,
-    json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) level_detail,
+    json_build_object('id',l.id,'kode',l.code,'nama',l.name) level_detail,
     COALESCE(array_agg(DISTINCT m.key||'.'||a.key ORDER BY m.key||'.'||a.key) FILTER(WHERE a.id IS NOT NULL),'{}') permissions
     FROM users u LEFT JOIN levels l ON l.id=u.level_id LEFT JOIN level_permissions lp ON lp.level_id=l.id LEFT JOIN menu_actions a ON a.id=lp.menu_action_id LEFT JOIN menus m ON m.id=a.menu_id
     WHERE $1 = '' OR u.username ILIKE '%' || $1 || '%' OR u.nama ILIKE '%' || $1 || '%' OR u.email ILIKE '%' || $1 || '%'

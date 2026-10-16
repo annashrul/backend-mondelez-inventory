@@ -11,7 +11,15 @@
     "test": "node --test",
     "db:migrate:search-audit": "node scripts/migrate-search-audit.js",
     "db:migrate:table-names": "node scripts/migrate-table-names.js",
-    "db:check:table-names": "node scripts/check-table-name-migration.js"
+    "db:check:table-names": "node scripts/check-table-name-migration.js",
+    "db:migrate:activity-log-columns": "node scripts/migrate-activity-log-columns.js",
+    "db:check:activity-log-columns": "node scripts/check-activity-log-columns.js",
+    "db:migrate:item-columns": "node scripts/migrate-item-columns.js",
+    "db:check:item-columns": "node scripts/check-item-columns.js",
+    "db:migrate:level-location-columns": "node scripts/migrate-level-location-columns.js",
+    "db:check:level-location-columns": "node scripts/check-level-location-columns.js",
+    "db:migrate:menu-columns": "node scripts/migrate-menu-columns.js",
+    "db:check:menu-columns": "node scripts/check-menu-columns.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

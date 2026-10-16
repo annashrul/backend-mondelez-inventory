@@ -57,7 +57,7 @@ export async function searchImage(req, res, next) {
     });
     if (!candidates.length) throw new HttpError(404, 'Belum ada barang dengan image embedding yang cocok dengan model AI aktif');
     const results = applyImageSearchGate(candidates, limit(req.body?.limit));
-    await safeLogActivity({ req, aksi: 'Cari', modul: 'AI Search Barang', detail: `Pencarian gambar: ${candidates.length} kandidat, ${results.length} lolos ambang` });
+    await safeLogActivity({ req, action: 'Cari', module: 'AI Search Barang', detail: `Pencarian gambar: ${candidates.length} kandidat, ${results.length} lolos ambang` });
     res.json({ model: embedding.model, results });
   } catch (error) {
     next(error);
@@ -80,7 +80,7 @@ export async function scanRack(req, res, next) {
     if (result.status === 'rack-missing') throw new HttpError(404, 'QR rak tidak terdaftar');
     if (result.status === 'barang-missing') throw new HttpError(404, 'Barang tidak ditemukan');
     if (result.status === 'wrong-rack') throw new HttpError(409, `Rak tidak sesuai. Barang berada di ${result.barang?.rak_detail?.nama || '-'}`);
-    await safeLogActivity({ req, aksi: 'Scan', modul: 'Scan QR Rak', detail: `Scan QR valid: ${result.rak?.nama || qrCode} untuk ${result.barang?.nama || 'barang'}` });
+    await safeLogActivity({ req, action: 'Scan', module: 'Scan QR Rak', detail: `Scan QR valid: ${result.rak?.nama || qrCode} untuk ${result.barang?.nama || 'barang'}` });
     res.json({ valid: true, rak: result.rak, barang: result.barang });
   } catch (error) {
     next(error);
@@ -93,7 +93,7 @@ export async function rackItems(req, res, next) {
     if (!qrCode) throw new HttpError(422, 'Kode QR rak wajib diisi');
     const result = await listBarangByRackQr(qrCode);
     if (result.status === 'rack-missing') throw new HttpError(404, 'QR rak tidak terdaftar');
-    await safeLogActivity({ req, aksi: 'Scan', modul: 'Scan QR Rak', detail: `Scan QR rak: ${result.rak?.nama || qrCode}` });
+    await safeLogActivity({ req, action: 'Scan', module: 'Scan QR Rak', detail: `Scan QR rak: ${result.rak?.nama || qrCode}` });
     res.json({ valid: true, rak: result.rak, barang: result.barang });
   } catch (error) {
     next(error);

@@ -29,7 +29,7 @@ router.get('/database-status', settingsAccess(), async (req, res, next) => {
 router.post('/backup', settingsAccess('pengaturan.update'), async (req, res, next) => {
   try {
     const result = await runBackup();
-    await safeLogActivity({ req, aksi: 'Backup', modul: 'Pengaturan Database', detail: 'Backup manual selesai' });
+    await safeLogActivity({ req, action: 'Backup', module: 'Pengaturan Database', detail: 'Backup manual selesai' });
     res.json(result);
   } catch (error) { next(error); }
 });
@@ -43,7 +43,7 @@ router.put('/:section', settingsAccess('pengaturan.update'), async (req, res, ne
     }
     const before = await getSettings({ fresh: true });
     const result = await saveSettings(req.params.section, req.body);
-    await safeLogActivity({ req, aksi: 'Edit', modul: 'Pengaturan', detail: `${req.params.section}: ${settingsChanges(before, result, settingSections[req.params.section] || [])}` });
+    await safeLogActivity({ req, action: 'Edit', module: 'Pengaturan', detail: `${req.params.section}: ${settingsChanges(before, result, settingSections[req.params.section] || [])}` });
     res.json(result);
   } catch (error) { next(error); }
 });

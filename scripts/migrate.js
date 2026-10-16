@@ -17,6 +17,10 @@ try {
   await client.query(sql);
   await client.query(await readFile(new URL('../migrations/001_search_audit.sql', import.meta.url), 'utf8'));
   await client.query(await readFile(new URL('../migrations/002_english_table_names.sql', import.meta.url), 'utf8'));
+  await client.query(await readFile(new URL('../migrations/003_english_activity_log_columns.sql', import.meta.url), 'utf8'));
+  await client.query(await readFile(new URL('../migrations/004_english_item_columns.sql', import.meta.url), 'utf8'));
+  await client.query(await readFile(new URL('../migrations/005_english_level_location_columns.sql', import.meta.url), 'utf8'));
+  await client.query(await readFile(new URL('../migrations/006_english_menu_columns.sql', import.meta.url), 'utf8'));
   await client.query('COMMIT');
   console.log('Migrasi Supabase berhasil.');
 } catch (error) {

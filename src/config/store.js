@@ -1,3 +1,4 @@
+import { normalizeActivityLog } from './activityLogColumns.js';
 import { normalizeStoreTables } from './tableNames.js';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -21,7 +22,9 @@ async function ensureStore() {
 
 export async function readStore() {
   await ensureStore();
-  return normalizeStoreTables(JSON.parse(await readFile(dataFile, 'utf8')));
+  const store = normalizeStoreTables(JSON.parse(await readFile(dataFile, 'utf8')));
+  if (store.activity_logs) store.activity_logs = store.activity_logs.map(normalizeActivityLog);
+  return store;
 }
 
 export function updateStore(updater) {

@@ -1,3 +1,5 @@
+import { fromPublicLevel, fromPublicLocation } from '../src/config/masterColumns.js';
+import { fromPublicItem, fromPublicGroup, mapContractResponse } from '../src/config/itemColumns.js';
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 
@@ -26,7 +28,11 @@ async function request(path, options) {
     ...options,
     headers: { ...options?.headers, connection: 'close' }
   });
-  const body = await response.json();
+  const raw = await response.json();
+  const body = /^\/barang(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicItem)
+    : /^\/kelompok-barang(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicGroup)
+    : /^\/level-pengguna(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicLevel)
+    : /^\/lokasi(?:\/|\?|$)/.test(path) ? mapContractResponse(raw,fromPublicLocation) : raw;
   return { status: response.status, body };
 }
 
@@ -282,7 +288,7 @@ test('CRUD kelompok, satuan, lokasi, dan rak', async () => {
     if (master.endpoint === 'satuan') {
       const logs = await request(`/log-activity?search=${encodeURIComponent(master.payload.nama)}`);
       assert.equal(logs.status, 200);
-      assert.ok(listData(logs.body).some((row) => row.aksi === 'Hapus' && row.modul === 'Master Satuan'));
+      assert.ok(listData(logs.body).some((row) => row.action === 'Hapus' && row.module === 'Master Satuan'));
     }
   }
 });

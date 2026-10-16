@@ -30,23 +30,23 @@ test('settings and notification changes are recorded once with actor and before/
   const entries = await logs();
   assert.equal(entries.length, 1);
   assert.equal(entries[0].user_id, 1);
-  assert.equal(entries[0].modul, 'Pengaturan');
+  assert.equal(entries[0].module, 'Pengaturan');
   assert.match(entries[0].detail, /Tema: light → dark/);
   assert.match(entries[0].detail, /Data per halaman: 10 → 5/);
   assert.doesNotMatch(JSON.stringify(entries), /DO_NOT_LOG/);
   assert.equal((await request('/notifications/settings', 'PUT', { email_enabled: true })).status, 200);
-  assert.equal((await logs())[0].modul, 'Pengaturan Notifikasi');
+  assert.equal((await logs())[0].module, 'Pengaturan Notifikasi');
   assert.match((await logs())[0].detail, /Notifikasi email: Nonaktif → Aktif/);
 });
 
 test('failed saves, failed login, and read/search actions are also recorded safely', async () => {
   assert.equal((await request('/settings/keamanan', 'PUT', { session_timeout: 0, password: 'PRIVATE_PASSWORD' })).status, 422);
-  assert.equal((await logs())[0].aksi, 'Gagal Edit');
+  assert.equal((await logs())[0].action, 'Gagal Edit');
   assert.equal((await request('/auth/login', 'POST', { username: 'operator', password: 'PRIVATE_PASSWORD' }, { 'Content-Type': 'application/json', connection: 'close', 'X-User-Id': '1' })).status, 401);
-  assert.equal((await logs())[0].aksi, 'Gagal Login');
+  assert.equal((await logs())[0].action, 'Gagal Login');
   assert.equal((await logs())[0].user_id, null);
   assert.equal((await request('/barang?search=audit-check&limit=5')).status, 200);
-  assert.equal((await logs())[0].aksi, 'Cari');
+  assert.equal((await logs())[0].action, 'Cari');
   assert.match((await logs())[0].detail, /search=audit-check/);
   assert.doesNotMatch(JSON.stringify(await logs()), /PRIVATE_PASSWORD|Bearer/);
 });
@@ -75,7 +75,7 @@ test('reading the audit trail does not create an endless audit loop; manual back
   assert.equal((await request('/log-activity')).status, 200);
   assert.equal((await logs()).length, count);
   assert.equal((await request('/settings/backup', 'POST', {})).status, 200);
-  assert.equal((await logs())[0].aksi, 'Backup');
+  assert.equal((await logs())[0].action, 'Backup');
 });
 
 test('only allowed settings fields can appear in a diff', () => {
@@ -87,7 +87,7 @@ test('existing business logs are not duplicated by the fallback audit', async ()
   const created = await request('/kelompok-barang', 'POST', { kode: 'AUDIT-GRP', nama: 'Audit group' });
   assert.equal(created.status, 201);
   assert.equal((await logs()).length, count + 1);
-  assert.equal((await logs())[0].aksi, 'Tambah');
+  assert.equal((await logs())[0].action, 'Tambah');
   assert.match((await logs())[0].detail, /Audit group/);
   assert.equal((await request(`/kelompok-barang/${created.body.id}`, 'DELETE')).status, 200);
   assert.equal((await logs()).length, count + 2);
@@ -96,6 +96,19 @@ test('existing business logs are not duplicated by the fallback audit', async ()
 test('invalid JSON is audited without storing its raw contents', async () => {
   const response = await fetch(base + '/settings/tampilan', { method: 'PUT', headers, body: '{"password":"MALFORMED_SECRET"' });
   assert.equal(response.status, 400);
-  assert.equal((await logs())[0].aksi, 'Gagal Edit');
+  assert.equal((await logs())[0].action, 'Gagal Edit');
   assert.doesNotMatch(JSON.stringify(await logs()), /MALFORMED_SECRET/);
+});
+
+test('activity API returns and searches the English log column contract', async () => {
+  const { logActivity } = await import('../src/services/activityLogger.js');
+  await logActivity({userId:1,action:'Column Contract',module:'English Log Schema',detail:'Column migration record'});
+  for (const search of ['Column Contract','English Log Schema','Column migration record']) {
+    const result=await request('/log-activity?search='+encodeURIComponent(search));
+    assert.equal(result.status,200);
+    const row=result.body.data.find(row=>row.action==='Column Contract');
+    assert.ok(row);assert.equal(row.module,'English Log Schema');
+    assert.equal(typeof row.occurred_at,'string');
+    for(const old of ['aksi','modul','waktu']) assert.ok(!Object.hasOwn(row,old));
+  }
 });

@@ -1,3 +1,4 @@
+import { fromPublicLevel, toPublicLevel } from '../config/masterColumns.js';
 import { getSettings } from '../services/settingsService.js';
 import { beginLoginChallenge, consumeLoginChallenge, createSession, removeSession, validateSession } from '../services/securityService.js';
 import { verifyToken } from '../services/authService.js';
@@ -15,6 +16,7 @@ function mapError(error) {
   if(error.code==='INVALID_LEVEL') throw new HttpError(422,'Level pengguna tidak ditemukan'); throw error;
 }
 function levelPayload(body,current={}) {
+  body = fromPublicLevel(body);
   const value={kode:text(body.kode??current.kode),nama:text(body.nama??current.nama),deskripsi:text(body.deskripsi??current.deskripsi),action_ids:body.action_ids??current.action_ids??[]};
   if(!value.kode||!value.nama) throw new HttpError(422,'Kode dan nama level wajib diisi');
   if(value.kode.length>20||value.nama.length>100) throw new HttpError(422,'Kode maksimal 20 dan nama maksimal 100 karakter');
@@ -34,20 +36,20 @@ async function userPayload(body,current={}) {
   value.password=password?await hashPassword(password):null; return value;
 }
 
-export const listLevels=async(req,res,next)=>{try{res.json(paginated(await repository.findLevels(String(req.query.search||'')),req.query));}catch(e){next(e);}};
-export const generateLevelCode=async(req,res,next)=>{try{res.json({kode:await repository.generateLevelCode()});}catch(e){next(e);}};
-export const getLevel=async(req,res,next)=>{try{const row=await repository.findLevel(id(req.params.id,'Level ID'));if(!row)throw new HttpError(404,'Level tidak ditemukan');res.json(row);}catch(e){next(e);}};
-export const createLevel=async(req,res,next)=>{try{const row=await repository.saveLevel(null,levelPayload(req.body));await safeLogActivity({req,aksi:'Tambah',modul:'Level Pengguna',detail:`Tambah level: ${row.nama||row.kode}`});res.status(201).json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
-export const updateLevel=async(req,res,next)=>{try{const key=id(req.params.id,'Level ID'),current=await repository.findLevel(key);if(!current)throw new HttpError(404,'Level tidak ditemukan');const row=await repository.saveLevel(key,levelPayload(req.body,current));await safeLogActivity({req,aksi:'Edit',modul:'Level Pengguna',detail:`Edit level: ${row.nama||row.kode}`});res.json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
-export const deleteLevel=async(req,res,next)=>{try{const key=id(req.params.id,'Level ID'),current=await repository.findLevel(key),result=await repository.removeLevel(key);if(result==='missing')throw new HttpError(404,'Level tidak ditemukan');if(result==='used')throw new HttpError(409,'Level masih digunakan pengguna dan tidak dapat dihapus');await safeLogActivity({req,aksi:'Hapus',modul:'Level Pengguna',detail:`Hapus level: ${current?.nama||current?.kode||key}`});res.json({message:'Level berhasil dihapus'});}catch(e){next(e);}};
+export const listLevels=async(req,res,next)=>{try{res.json(paginated((await repository.findLevels(String(req.query.search||''))).map(toPublicLevel),req.query));}catch(e){next(e);}};
+export const generateLevelCode=async(req,res,next)=>{try{res.json({code:await repository.generateLevelCode()});}catch(e){next(e);}};
+export const getLevel=async(req,res,next)=>{try{const row=await repository.findLevel(id(req.params.id,'Level ID'));if(!row)throw new HttpError(404,'Level tidak ditemukan');res.json(toPublicLevel(row));}catch(e){next(e);}};
+export const createLevel=async(req,res,next)=>{try{const row=await repository.saveLevel(null,levelPayload(req.body));await safeLogActivity({req,action:'Tambah',module:'Level Pengguna',detail:`Tambah level: ${row.nama||row.kode}`});res.status(201).json(toPublicLevel(row));}catch(e){try{mapError(e);}catch(x){next(x);}}};
+export const updateLevel=async(req,res,next)=>{try{const key=id(req.params.id,'Level ID'),current=await repository.findLevel(key);if(!current)throw new HttpError(404,'Level tidak ditemukan');const row=await repository.saveLevel(key,levelPayload(req.body,current));await safeLogActivity({req,action:'Edit',module:'Level Pengguna',detail:`Edit level: ${row.nama||row.kode}`});res.json(toPublicLevel(row));}catch(e){try{mapError(e);}catch(x){next(x);}}};
+export const deleteLevel=async(req,res,next)=>{try{const key=id(req.params.id,'Level ID'),current=await repository.findLevel(key),result=await repository.removeLevel(key);if(result==='missing')throw new HttpError(404,'Level tidak ditemukan');if(result==='used')throw new HttpError(409,'Level masih digunakan pengguna dan tidak dapat dihapus');await safeLogActivity({req,action:'Hapus',module:'Level Pengguna',detail:`Hapus level: ${current?.nama||current?.kode||key}`});res.json({message:'Level berhasil dihapus'});}catch(e){next(e);}};
 export const listUsers=async(req,res,next)=>{try{res.json(paginated(await repository.findUsers(String(req.query.search||'')),req.query));}catch(e){next(e);}};
 export const getUser=async(req,res,next)=>{try{const row=await repository.findUser(id(req.params.id,'User ID'));if(!row)throw new HttpError(404,'Pengguna tidak ditemukan');res.json(row);}catch(e){next(e);}};
-export const createUser=async(req,res,next)=>{try{const row=await repository.saveUser(null,await userPayload(req.body));await safeLogActivity({req,aksi:'Tambah',modul:'Master Pengguna',detail:`Tambah pengguna: ${row.nama||row.username}`});res.status(201).json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
-export const updateUser=async(req,res,next)=>{try{const key=id(req.params.id,'User ID'),current=await repository.findUser(key);if(!current)throw new HttpError(404,'Pengguna tidak ditemukan');const row=await repository.saveUser(key,await userPayload(req.body,current));await safeLogActivity({req,aksi:'Edit',modul:'Master Pengguna',detail:`Edit pengguna: ${row.nama||row.username}`});res.json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
-export const deleteUser=async(req,res,next)=>{try{const key=id(req.params.id,'User ID'),current=await repository.findUser(key);if(!await repository.removeUser(key))throw new HttpError(404,'Pengguna tidak ditemukan');await safeLogActivity({req,aksi:'Hapus',modul:'Master Pengguna',detail:`Hapus pengguna: ${current?.nama||current?.username||key}`});res.json({message:'Pengguna berhasil dihapus'});}catch(e){next(e);}};
+export const createUser=async(req,res,next)=>{try{const row=await repository.saveUser(null,await userPayload(req.body));await safeLogActivity({req,action:'Tambah',module:'Master Pengguna',detail:`Tambah pengguna: ${row.nama||row.username}`});res.status(201).json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
+export const updateUser=async(req,res,next)=>{try{const key=id(req.params.id,'User ID'),current=await repository.findUser(key);if(!current)throw new HttpError(404,'Pengguna tidak ditemukan');const row=await repository.saveUser(key,await userPayload(req.body,current));await safeLogActivity({req,action:'Edit',module:'Master Pengguna',detail:`Edit pengguna: ${row.nama||row.username}`});res.json(row);}catch(e){try{mapError(e);}catch(x){next(x);}}};
+export const deleteUser=async(req,res,next)=>{try{const key=id(req.params.id,'User ID'),current=await repository.findUser(key);if(!await repository.removeUser(key))throw new HttpError(404,'Pengguna tidak ditemukan');await safeLogActivity({req,action:'Hapus',module:'Master Pengguna',detail:`Hapus pengguna: ${current?.nama||current?.username||key}`});res.json({message:'Pengguna berhasil dihapus'});}catch(e){next(e);}};
 async function completeLogin(req, res, user) {
   const session = await createSession(user.id);
-  await safeLogActivity({ req, userId: Number(user.id), aksi: 'Login', modul: 'Auth', detail: 'Login berhasil' });
+  await safeLogActivity({ req, userId: Number(user.id), action: 'Login', module: 'Auth', detail: 'Login berhasil' });
   res.json({ user, token: createToken(user, session) });
 }
 export const login = async (req, res, next) => {

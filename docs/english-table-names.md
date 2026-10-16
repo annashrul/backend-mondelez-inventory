@@ -17,7 +17,7 @@ The physical tables in the `public` schema use English names. Existing English n
 
 `settings` preserves the old `pengaturan` table; it is separate from `app_settings`, which is the settings store used by the current backend. Tables such as `users`, `levels`, `menus`, `closing`, `notifications`, and `search_audit` already have English names.
 
-HTTP paths, permission keys, notification types, column names and JSON response fields keep their existing contracts. For example, `/barang` reads `items` and still returns `nama`, `rak_detail` and `satuan_detail`. Existing frontend versions therefore continue to work. Local JSON test stores normalize legacy table keys on read and persist canonical keys on the next write. Conflicting old/new store contents are rejected rather than silently discarded.
+The table-name migration preserves HTTP paths, permission keys, notification types, column names and JSON response fields. A later migration changes the activity log columns and API fields; see [activity log columns](activity-log-columns.md). For example, `/barang` reads `items` and still returns `nama`, `rak_detail` and `satuan_detail`. Existing frontend versions therefore continue to work. Local JSON test stores normalize legacy table keys on read and persist canonical keys on the next write. Conflicting old/new store contents are rejected rather than silently discarded.
 
 ## Deployment
 

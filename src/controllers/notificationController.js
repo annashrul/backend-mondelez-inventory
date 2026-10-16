@@ -46,7 +46,7 @@ export async function updateSettings(req, res, next) {
   try {
     const before = await getNotificationSetting();
     const result = await saveNotificationSetting(req.body || {});
-    await safeLogActivity({ req, aksi: 'Edit', modul: 'Pengaturan Notifikasi', detail: settingsChanges(before, result, ['email_enabled', 'stock_enabled', 'transaction_enabled', 'level_ids', 'user_ids']) });
+    await safeLogActivity({ req, action: 'Edit', module: 'Pengaturan Notifikasi', detail: settingsChanges(before, result, ['email_enabled', 'stock_enabled', 'transaction_enabled', 'level_ids', 'user_ids']) });
     res.json(result);
   } catch (error) {
     next(error);

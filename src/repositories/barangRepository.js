@@ -3,17 +3,17 @@ import { generateInternalBarcode } from '../utils/barcode.js';
 import { query } from "../config/database.js";
 import { readStore, updateStore } from "../config/store.js";
 
-const fields = `b.id, b.kode, b.barcode, b.nama,
-  b.kelompok_id, b.satuan_id, b.rak_id,
-  json_build_object('id',k.id,'kode',k.kode,'nama',k.nama) AS kelompok_detail,
+const fields = `b.id, b.code AS kode, b.barcode, b.name AS nama,
+  b.item_group_id AS kelompok_id, b.unit_id AS satuan_id, b.rack_id AS rak_id,
+  json_build_object('id',k.id,'kode',k.code,'nama',k.name) AS kelompok_detail,
   json_build_object('id',s.id,'kode',s.kode,'nama',s.nama) AS satuan_detail,
   json_build_object('id',r.id,'kode',r.kode,'nama',r.nama,'qr_code',r.qr_code,'lokasi_id',r.lokasi_id) AS rak_detail,
-  b.stok, b.stok_min, b.harga, b.deskripsi, b.image_path, b.image_url,
+  b.stock AS stok, b.min_stock AS stok_min, b.price AS harga, b.description AS deskripsi, b.image_path, b.image_url,
   b.embedding_model, (b.embedding IS NOT NULL) AS has_embedding,
   COALESCE(b.is_deleted, FALSE) AS is_deleted, b.deleted_at, b.deleted_by,
   b.created_at, b.updated_at`;
-const joins = `LEFT JOIN item_groups k ON k.id=b.kelompok_id
-  LEFT JOIN units s ON s.id=b.satuan_id LEFT JOIN racks r ON r.id=b.rak_id`;
+const joins = `LEFT JOIN item_groups k ON k.id=b.item_group_id
+  LEFT JOIN units s ON s.id=b.unit_id LEFT JOIN racks r ON r.id=b.rack_id`;
 const useTestStore = process.env.NODE_ENV === "test";
 const codePrefix = "BRG";
 
@@ -63,7 +63,7 @@ export async function findAll(search = "", { fuzzy = false } = {}) {
   const result = await query(
     `SELECT ${fields} FROM items b ${joins}
      WHERE COALESCE(b.is_deleted, FALSE)=FALSE
-       AND ($1 = '' OR b.kode ILIKE '%' || $1 || '%' OR b.barcode ILIKE '%' || $1 || '%' OR b.nama ILIKE '%' || $1 || '%')
+       AND ($1 = '' OR b.code ILIKE '%' || $1 || '%' OR b.barcode ILIKE '%' || $1 || '%' OR b.name ILIKE '%' || $1 || '%')
      ORDER BY b.id`,
     [term],
   );
@@ -88,7 +88,7 @@ export async function generateCode() {
     const store = await readStore();
     return nextCodeFromRows(store.items || []);
   }
-  const result = await query("SELECT kode FROM items WHERE kode ILIKE $1", [`${codePrefix}-%`]);
+  const result = await query("SELECT code AS kode FROM items WHERE code ILIKE $1", [`${codePrefix}-%`]);
   return nextCodeFromRows(result.rows);
 }
 
@@ -136,10 +136,10 @@ export async function create(item, image = {}) {
       data.items.push(created);
       return hydrateMasterDetails(created, data);
     });
-  const values = ["kode", "barcode", "nama", "kelompok_id", "satuan_id", "rak_id", "stok", "stok_min", "harga"].map((field) => item[field]);
+  const values = ["kode", "barcode", "nama", "kelompok_id", "satuan_id", "rak_id", "stok", "stok_min", "harga", "deskripsi"].map((field) => item[field]);
   const result = await query(
-    `INSERT INTO items (kode, barcode, nama, kelompok_id, satuan_id, rak_id, stok, stok_min, harga, image_path, image_url, embedding, embedding_model)
-     SELECT $1,$2,$3,k.id,s.id,r.id,$7,$8,$9,$10,$11,$12::extensions.vector,$13
+    `INSERT INTO items (code, barcode, name, item_group_id, unit_id, rack_id, stock, min_stock, price, description, image_path, image_url, embedding, embedding_model)
+     SELECT $1,$2,$3,k.id,s.id,r.id,$7,$8,$9,$10,$11,$12,$13::extensions.vector,$14
      FROM item_groups k, units s, racks r
      WHERE k.id=$4 AND s.id=$5 AND r.id=$6
        AND COALESCE(k.is_deleted, FALSE)=FALSE AND COALESCE(s.is_deleted, FALSE)=FALSE AND COALESCE(r.is_deleted, FALSE)=FALSE
@@ -199,14 +199,14 @@ export async function update(id, item, image) {
       };
       return hydrateMasterDetails(data.items[index], data);
     });
-  const values = ["kode", "barcode", "nama", "kelompok_id", "satuan_id", "rak_id", "stok", "stok_min", "harga"].map((field) => item[field]);
+  const values = ["kode", "barcode", "nama", "kelompok_id", "satuan_id", "rak_id", "stok", "stok_min", "harga", "deskripsi"].map((field) => item[field]);
   const result = image
     ? await query(
-        `UPDATE items b SET kode=$1, barcode=$2, nama=$3,
-        kelompok_id=k.id, satuan_id=s.id, rak_id=r.id, stok=$7, stok_min=$8, harga=$9,
-        image_path=$10, image_url=$11, embedding=$12::extensions.vector, embedding_model=$13
+        `UPDATE items b SET code=$1, barcode=$2, name=$3,
+        item_group_id=k.id, unit_id=s.id, rack_id=r.id, stock=$7, min_stock=$8, price=$9, description=$10,
+        image_path=$11, image_url=$12, embedding=$13::extensions.vector, embedding_model=$14
         FROM item_groups k, units s, racks r
-        WHERE b.id=$14 AND k.id=$4 AND s.id=$5 AND r.id=$6
+        WHERE b.id=$15 AND k.id=$4 AND s.id=$5 AND r.id=$6
           AND COALESCE(k.is_deleted, FALSE)=FALSE AND COALESCE(s.is_deleted, FALSE)=FALSE AND COALESCE(r.is_deleted, FALSE)=FALSE RETURNING b.id`,
         [
           ...values,
@@ -218,10 +218,10 @@ export async function update(id, item, image) {
         ],
       )
     : await query(
-        `UPDATE items b SET kode=$1, barcode=$2, nama=$3,
-        kelompok_id=k.id, satuan_id=s.id, rak_id=r.id, stok=$7, stok_min=$8, harga=$9
+        `UPDATE items b SET code=$1, barcode=$2, name=$3,
+        item_group_id=k.id, unit_id=s.id, rack_id=r.id, stock=$7, min_stock=$8, price=$9, description=$10
         FROM item_groups k, units s, racks r
-        WHERE b.id=$10 AND k.id=$4 AND s.id=$5 AND r.id=$6
+        WHERE b.id=$11 AND k.id=$4 AND s.id=$5 AND r.id=$6
           AND COALESCE(k.is_deleted, FALSE)=FALSE AND COALESCE(s.is_deleted, FALSE)=FALSE AND COALESCE(r.is_deleted, FALSE)=FALSE RETURNING b.id`,
         [...values, id],
       );

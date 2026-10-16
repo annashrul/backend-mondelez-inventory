@@ -4,10 +4,10 @@ import { readStore, updateStore } from '../config/store.js';
 const useTestStore = process.env.NODE_ENV === 'test';
 
 export const masterConfigs = {
-  'kelompok-barang': { table: 'item_groups', fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'kelompok_id', 'jumlah_barang'], prefix: 'KLP' },
-  satuan: { table: 'units', fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'satuan_id', 'jumlah_barang'], prefix: 'STN' },
-  lokasi: { table: 'locations', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['racks', 'lokasi_id', 'jumlah_rak'], prefix: 'LOK' },
-  rak: { table: 'racks', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['items', 'rak_id', 'jumlah_barang'], prefix: 'RAK' }
+  'kelompok-barang': { table: 'item_groups', columns: {kode:'code',nama:'name',deskripsi:'description'}, fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'item_group_id', 'jumlah_barang', 'kelompok_id'], prefix: 'KLP' },
+  satuan: { table: 'units', fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'unit_id', 'jumlah_barang', 'satuan_id'], prefix: 'STN' },
+  lokasi: { table: 'locations', columns: {kode:'code',nama:'name',alamat:'address',deskripsi:'description'}, fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['racks', 'lokasi_id', 'jumlah_rak'], prefix: 'LOK' },
+  rak: { table: 'racks', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['items', 'rack_id', 'jumlah_barang', 'rak_id'], prefix: 'RAK' }
 };
 
 function configFor(key) {
@@ -17,23 +17,24 @@ function configFor(key) {
 }
 
 function withCountSql(config) {
-  if (!config.count) return 'm.*';
+  const projection = config.columns ? ['m.id', ...config.fields.map(field => `m.${config.columns[field] || field} AS ${field}`), 'm.created_at','m.updated_at','m.is_deleted','m.deleted_at','m.deleted_by'].join(',') : 'm.*';
+  if (!config.count) return projection;
   const [referenceTable, referenceField, alias] = config.count;
-  return `m.*, (SELECT COUNT(*)::int FROM ${referenceTable} r WHERE r.${referenceField} = m.id AND COALESCE(r.is_deleted, FALSE)=FALSE) AS ${alias}`;
+  return `${projection}, (SELECT COUNT(*)::int FROM ${referenceTable} r WHERE r.${referenceField} = m.id AND COALESCE(r.is_deleted, FALSE)=FALSE) AS ${alias}`;
 }
 
 function addTestCount(key, item, store) {
   const config = configFor(key);
   if (!config.count) return item;
-  const [referenceTable, referenceField, alias] = config.count;
-  const result = { ...item, [alias]: (store[referenceTable] || []).filter((row) => row[referenceField] === item.id && !row.is_deleted).length };
+  const [referenceTable, referenceField, alias, storeField = referenceField] = config.count;
+  const result = { ...item, [alias]: (store[referenceTable] || []).filter((row) => row[storeField] === item.id && !row.is_deleted).length };
   if (key === 'rak') result.lokasi_detail = store.locations.find((row) => row.id === item.lokasi_id && !row.is_deleted) || null;
   return result;
 }
 
 function selectSql(key, config) {
   if (key !== 'rak') return withCountSql(config);
-  return `${withCountSql(config)}, json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) AS lokasi_detail`;
+  return `${withCountSql(config)}, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail`;
 }
 
 function nextCodeFromRows(rows, prefix) {
@@ -51,7 +52,7 @@ export async function generateCode(key) {
     const store = await readStore();
     return nextCodeFromRows(store[config.table] || [], config.prefix);
   }
-  const result = await query(`SELECT kode FROM ${config.table} WHERE kode ILIKE $1`, [`${config.prefix}-%`]);
+  const result = await query(`SELECT ${config.columns?.kode || "kode"} AS kode FROM ${config.table} WHERE ${config.columns?.kode || "kode"} ILIKE $1`, [`${config.prefix}-%`]);
   return nextCodeFromRows(result.rows, config.prefix);
 }
 
@@ -68,7 +69,7 @@ export async function findAll(key, search = '') {
     `SELECT ${selectSql(key, config)} FROM ${config.table} m
      ${key === 'rak' ? 'JOIN locations l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''}
      WHERE COALESCE(m.is_deleted, FALSE)=FALSE
-       AND ($1 = '' OR m.kode ILIKE '%' || $1 || '%' OR m.nama ILIKE '%' || $1 || '%')
+       AND ($1 = '' OR m.${config.columns?.kode || 'kode'} ILIKE '%' || $1 || '%' OR m.${config.columns?.nama || 'nama'} ILIKE '%' || $1 || '%')
      ORDER BY m.id`, [search.trim()]
   )).rows;
 }
@@ -95,7 +96,7 @@ export async function create(key, item) {
   });
   const placeholders = config.fields.map((_, index) => `$${index + 1}`).join(',');
   const result = await query(
-    `INSERT INTO ${config.table} (${config.fields.join(',')}) VALUES (${placeholders}) RETURNING *`,
+    `INSERT INTO ${config.table} (${config.fields.map(field => config.columns?.[field] || field).join(',')}) VALUES (${placeholders}) RETURNING *`,
     config.fields.map((field) => item[field])
   );
   return findById(key, result.rows[0].id);
@@ -112,7 +113,7 @@ export async function update(key, id, item) {
     store[config.table][index] = { ...store[config.table][index], ...item };
     return addTestCount(key, store[config.table][index], store);
   });
-  const assignments = config.fields.map((field, index) => `${field}=$${index + 1}`).join(',');
+  const assignments = config.fields.map((field, index) => `${config.columns?.[field] || field}=$${index + 1}`).join(',');
   const result = await query(
     `UPDATE ${config.table} SET ${assignments}, updated_at=NOW() WHERE id=$${config.fields.length + 1} RETURNING id`,
     [...config.fields.map((field) => item[field]), id]

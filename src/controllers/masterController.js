@@ -1,3 +1,5 @@
+import { fromPublicLocation, toPublicLocation } from '../config/masterColumns.js';
+import { fromPublicGroup, toPublicGroup } from '../config/itemColumns.js';
 import { HttpError } from '../middleware/errors.js';
 import * as repository from '../repositories/masterRepository.js';
 import { requestUserId, safeLogActivity } from '../services/activityLogger.js';
@@ -8,6 +10,8 @@ const modules = { 'kelompok-barang': 'Kelompok Barang', satuan: 'Master Satuan',
 
 function normalize(key, body, current = {}) {
   const config = repository.masterConfigs[key];
+  if (key === 'kelompok-barang') body = fromPublicGroup(body);
+  if (key === 'lokasi') body = fromPublicLocation(body);
   const item = {};
   for (const field of config.fields) {
     let value = body[field] ?? current[field];
@@ -35,12 +39,12 @@ function mapError(error, key) {
 }
 
 export const list = (key) => async (req, res, next) => {
-  try { res.json(paginated(await repository.findAll(key, String(req.query.search || '')), req.query)); } catch (error) { next(error); }
+  try { res.json(paginated((await repository.findAll(key, String(req.query.search || ''))).map(row => key === 'kelompok-barang' ? toPublicGroup(row) : key === 'lokasi' ? toPublicLocation(row) : row), req.query)); } catch (error) { next(error); }
 };
 
 export const generateCode = (key) => async (req, res, next) => {
   try {
-    res.json({ kode: await repository.generateCode(key) });
+    res.json({ [['kelompok-barang','lokasi'].includes(key) ? 'code' : 'kode']: await repository.generateCode(key) });
   } catch (error) {
     next(error);
   }
@@ -50,15 +54,15 @@ export const get = (key) => async (req, res, next) => {
   try {
     const item = await repository.findById(key, Number(req.params.id));
     if (!item) throw new HttpError(404, `${labels[key]} tidak ditemukan`);
-    res.json(item);
+    res.json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : item);
   } catch (error) { next(error); }
 };
 
 export const create = (key) => async (req, res, next) => {
   try {
     const item = await repository.create(key, normalize(key, req.body));
-    await safeLogActivity({ req, aksi: 'Tambah', modul: modules[key], detail: `Tambah ${labels[key].toLowerCase()}: ${item.nama || item.kode}` });
-    res.status(201).json(item);
+    await safeLogActivity({ req, action: 'Tambah', module: modules[key], detail: `Tambah ${labels[key].toLowerCase()}: ${item.nama || item.kode}` });
+    res.status(201).json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : item);
   }
   catch (error) { try { mapError(error, key); } catch (mapped) { next(mapped); } }
 };
@@ -69,8 +73,8 @@ export const update = (key) => async (req, res, next) => {
     const current = await repository.findById(key, id);
     if (!current) throw new HttpError(404, `${labels[key]} tidak ditemukan`);
     const item = await repository.update(key, id, normalize(key, req.body, current));
-    await safeLogActivity({ req, aksi: 'Edit', modul: modules[key], detail: `Edit ${labels[key].toLowerCase()}: ${item.nama || item.kode}` });
-    res.json(item);
+    await safeLogActivity({ req, action: 'Edit', module: modules[key], detail: `Edit ${labels[key].toLowerCase()}: ${item.nama || item.kode}` });
+    res.json(key === 'kelompok-barang' ? toPublicGroup(item) : key === 'lokasi' ? toPublicLocation(item) : item);
   } catch (error) { try { mapError(error, key); } catch (mapped) { next(mapped); } }
 };
 
@@ -81,7 +85,7 @@ export const remove = (key) => async (req, res, next) => {
     const result = await repository.remove(key, id, requestUserId(req));
     if (result.used) throw new HttpError(409, `${labels[key]} masih digunakan dan tidak dapat dihapus`);
     if (!result.removed) throw new HttpError(404, `${labels[key]} tidak ditemukan`);
-    await safeLogActivity({ req, aksi: 'Hapus', modul: modules[key], detail: `Hapus ${labels[key].toLowerCase()}: ${current?.nama || current?.kode || id}` });
+    await safeLogActivity({ req, action: 'Hapus', module: modules[key], detail: `Hapus ${labels[key].toLowerCase()}: ${current?.nama || current?.kode || id}` });
     res.json({ message: `${labels[key]} berhasil dihapus` });
   } catch (error) { next(error); }
 };

@@ -3,7 +3,7 @@ import { readStore, updateStore } from '../config/store.js';
 
 const useTestStore = process.env.NODE_ENV === 'test';
 
-const barangDetailSql = "json_build_object('id',b.id,'kode',b.kode,'nama',b.nama,'stok_min',b.stok_min) AS barang_detail";
+const barangDetailSql = "json_build_object('id',b.id,'kode',b.code,'nama',b.name,'stok_min',b.min_stock) AS barang_detail";
 const userDetailSql = "json_build_object('id',u.id,'username',u.username,'nama',u.nama) AS user_detail";
 
 function hydrateTransaction(item, store) {
@@ -36,7 +36,7 @@ export async function listAdjustments({ search = '' } = {}) {
      FROM stock_adjustments a
      LEFT JOIN items b ON b.id=a.barang_id
      LEFT JOIN users u ON u.id=a.user_id
-     WHERE $1 = '' OR a.no_ref ILIKE '%' || $1 || '%' OR a.alasan ILIKE '%' || $1 || '%' OR b.nama ILIKE '%' || $1 || '%'
+     WHERE $1 = '' OR a.no_ref ILIKE '%' || $1 || '%' OR a.alasan ILIKE '%' || $1 || '%' OR b.name ILIKE '%' || $1 || '%'
      ORDER BY a.tanggal DESC, a.id DESC`,
     [search.trim()],
   )).rows;
@@ -61,7 +61,7 @@ export async function listKartuStok({ search = '', tipe = 'Semua' } = {}) {
      LEFT JOIN items b ON b.id=k.barang_id
      LEFT JOIN users u ON u.id=k.user_id
      WHERE ($1 = '' OR k.tipe=$1)
-       AND ($2 = '' OR k.no_ref ILIKE '%' || $2 || '%' OR k.keterangan ILIKE '%' || $2 || '%' OR b.nama ILIKE '%' || $2 || '%')
+       AND ($2 = '' OR k.no_ref ILIKE '%' || $2 || '%' OR k.keterangan ILIKE '%' || $2 || '%' OR b.name ILIKE '%' || $2 || '%')
      ORDER BY k.tanggal DESC, k.id DESC`,
     [selectedType, search.trim()],
   )).rows;
@@ -113,7 +113,7 @@ export async function createAdjustment(payload, userId) {
   try {
     await client.query('BEGIN');
     const locked = await client.query(
-      `SELECT id, kode, nama, stok FROM items
+      `SELECT id, code AS kode, name AS nama, stock AS stok FROM items
        WHERE id=$1 AND COALESCE(is_deleted, FALSE)=FALSE
        FOR UPDATE`,
       [payload.barang_id],
@@ -125,7 +125,7 @@ export async function createAdjustment(payload, userId) {
       throw Object.assign(new Error('insufficient stock'), { code: 'INSUFFICIENT_STOCK', stock: barang.stok });
     }
     const saldo = payload.tipe === 'Tambah' ? Number(barang.stok) + qty : Number(barang.stok) - qty;
-    await client.query('UPDATE items SET stok=$1, updated_at=NOW() WHERE id=$2', [saldo, payload.barang_id]);
+    await client.query('UPDATE items SET stock=$1, updated_at=NOW() WHERE id=$2', [saldo, payload.barang_id]);
     const adjustment = await client.query(
       `INSERT INTO stock_adjustments(tanggal,no_ref,barang_id,tipe,qty,alasan,user_id)
        VALUES($1,$2,$3,$4,$5,$6,$7)

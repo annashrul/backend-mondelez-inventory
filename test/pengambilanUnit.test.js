@@ -14,13 +14,17 @@ test('production withdrawal responses include the database unit used by HTML and
   const history = { id: 10, no_ref: 'AMB-10', qty: 1, barang_detail: { nama: 'Oreo', satuan_detail: { id: 3, kode: 'ST-003', nama: 'pcs' } } };
   let reads = 0;
   const query = async sql => {
-    assert.match(sql, /LEFT JOIN units s ON s.id=b.satuan_id/);
+    assert.match(sql, /LEFT JOIN units s ON s.id=b.unit_id/);
     assert.match(sql, /'satuan_detail',json_build_object\('id',s.id,'kode',s.kode,'nama',s.nama\)/);
     reads++;
     return { rows: [history] };
   };
   const client = {
     async query(sql) {
+      if (sql.includes('INSERT INTO activity_logs')) {
+        assert.match(sql, /activity_logs\(user_id,action,module,detail,ip\)/);
+        assert.doesNotMatch(sql, /\b(aksi|modul)\b/);
+      }
       if (sql.includes('FOR UPDATE OF b')) return { rowCount: 1, rows: [{ id: 1, rak_id: 2, qr_code: 'RAK:2', stok: 5, satuan_nama: 'pcs' }] };
       if (sql.includes('RETURNING id')) return { rows: [{ id: 10 }] };
       return { rows: [] };

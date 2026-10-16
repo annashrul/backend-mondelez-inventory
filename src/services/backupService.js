@@ -99,9 +99,9 @@ export async function checkScheduledBackup() {
   if (today !== lastDay) {
     try {
       await runBackup();
-      await safeLogActivity({ aksi: 'Backup', modul: 'Pengaturan Database', detail: 'Backup otomatis selesai' });
+      await safeLogActivity({ action: 'Backup', module: 'Pengaturan Database', detail: 'Backup otomatis selesai' });
     } catch (error) {
-      await safeLogActivity({ aksi: 'Gagal Backup', modul: 'Pengaturan Database', detail: 'Backup otomatis gagal' });
+      await safeLogActivity({ action: 'Gagal Backup', module: 'Pengaturan Database', detail: 'Backup otomatis gagal' });
       throw error;
     }
   }

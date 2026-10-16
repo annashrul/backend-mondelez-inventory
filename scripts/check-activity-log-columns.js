@@ -1,0 +1,43 @@
+import 'dotenv/config';
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import pg from 'pg';
+const connectionString=process.env.DIRECT_URL || process.env.DATABASE_URL;
+if (!connectionString) throw new Error('DIRECT_URL atau DATABASE_URL wajib dikonfigurasi');
+const client=new pg.Client({connectionString,ssl:{rejectUnauthorized:false},connectionTimeoutMillis:15000});
+const schema='log_columns_test_'+randomUUID().replaceAll('-','');
+const sql=await readFile(new URL('../migrations/003_english_activity_log_columns.sql',import.meta.url),'utf8');
+try {
+  await client.connect(); await client.query('BEGIN');
+  await client.query("SET LOCAL lock_timeout='5s'");
+  await client.query(`CREATE SCHEMA ${schema}`);
+  await client.query("SELECT set_config('inventory.migration_schema',$1,true)",[schema]);
+  await client.query(`CREATE TABLE ${schema}.activity_logs(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,waktu timestamptz NOT NULL DEFAULT now(),aksi text NOT NULL,modul text,detail text,ip text)`);
+  await client.query(`CREATE INDEX activity_time_idx ON ${schema}.activity_logs(waktu DESC)`);
+  await client.query(`ALTER TABLE ${schema}.activity_logs ENABLE ROW LEVEL SECURITY`);
+  await client.query(`INSERT INTO ${schema}.activity_logs(waktu,aksi,modul,detail,ip) VALUES ('2026-10-16T01:02:03Z','Login','Auth','Previous record','127.0.0.1')`);
+  const before=(await client.query('SELECT to_regclass($1)::oid AS oid',[`${schema}.activity_logs`])).rows[0].oid;
+  await client.query(sql); await client.query(sql);
+  const row=(await client.query(`SELECT * FROM ${schema}.activity_logs`)).rows[0];
+  assert.equal(row.action,'Login'); assert.equal(row.module,'Auth');
+  assert.equal(row.occurred_at.toISOString(),'2026-10-16T01:02:03.000Z');
+  assert.equal(row.detail,'Previous record');
+  for (const old of ['aksi','modul','waktu']) assert.ok(!Object.hasOwn(row,old));
+  assert.equal((await client.query('SELECT to_regclass($1)::oid AS oid',[`${schema}.activity_logs`])).rows[0].oid,before);
+  const fresh=(await client.query(`INSERT INTO ${schema}.activity_logs(action,module) VALUES ('Create','Items') RETURNING occurred_at`)).rows[0];
+  assert.ok(fresh.occurred_at instanceof Date,'timestamp default survives');
+  assert.equal((await client.query('SELECT relrowsecurity FROM pg_class WHERE oid=$1',[before])).rows[0].relrowsecurity,true);
+  const index=(await client.query("SELECT indexdef FROM pg_indexes WHERE schemaname=$1 AND indexname=$2",[schema,'activity_time_idx'])).rows[0];
+  assert.match(index.indexdef,/occurred_at DESC/);
+  await client.query('SAVEPOINT conflict');
+  await client.query(`ALTER TABLE ${schema}.activity_logs ADD COLUMN aksi text`);
+  await assert.rejects(client.query(sql),error=>error.code==='P0001');
+  await client.query('ROLLBACK TO SAVEPOINT conflict');
+  assert.equal((await client.query(`SELECT count(*)::int AS count FROM ${schema}.activity_logs`)).rows[0].count,2);
+  await client.query('ROLLBACK');
+  console.log('Activity log column checks passed: values, defaults, indexes, RLS, table identity, idempotence and conflict rollback. No test data persisted.');
+} catch(error) {
+  await client.query('ROLLBACK').catch(()=>{});
+  console.error('Activity log check failed:',error.code || 'CHECK_ERROR',error.message);process.exitCode=1;
+} finally {await client.end();}

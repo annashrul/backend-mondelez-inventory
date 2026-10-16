@@ -4,25 +4,25 @@ import { readStore, updateStore } from '../config/store.js';
 
 const useTestStore = process.env.NODE_ENV === 'test';
 
-const barangFields = `b.id, b.kode, b.barcode, b.nama,
-  b.kelompok_id, b.satuan_id, b.rak_id,
-  json_build_object('id',k.id,'kode',k.kode,'nama',k.nama) AS kelompok_detail,
+const barangFields = `b.id, b.code AS kode, b.barcode, b.name AS nama,
+  b.item_group_id AS kelompok_id, b.unit_id AS satuan_id, b.rack_id AS rak_id,
+  json_build_object('id',k.id,'kode',k.code,'nama',k.name) AS kelompok_detail,
   json_build_object('id',s.id,'kode',s.kode,'nama',s.nama) AS satuan_detail,
   json_build_object('id',r.id,'kode',r.kode,'nama',r.nama,'qr_code',r.qr_code,'lokasi_id',r.lokasi_id,
-    'lokasi_detail', json_build_object('id',l.id,'kode',l.kode,'nama',l.nama)) AS rak_detail,
-  b.stok, b.stok_min, b.harga, b.image_url, b.embedding_model, (b.embedding IS NOT NULL) AS has_embedding`;
+    'lokasi_detail', json_build_object('id',l.id,'kode',l.code,'nama',l.name)) AS rak_detail,
+  b.stock AS stok, b.min_stock AS stok_min, b.price AS harga, b.image_url, b.embedding_model, (b.embedding IS NOT NULL) AS has_embedding`;
 
-const barangJoins = `LEFT JOIN item_groups k ON k.id=b.kelompok_id
-  LEFT JOIN units s ON s.id=b.satuan_id
-  LEFT JOIN racks r ON r.id=b.rak_id
+const barangJoins = `LEFT JOIN item_groups k ON k.id=b.item_group_id
+  LEFT JOIN units s ON s.id=b.unit_id
+  LEFT JOIN racks r ON r.id=b.rack_id
   LEFT JOIN locations l ON l.id=r.lokasi_id`;
 
 const historyFields = `p.id, p.tanggal, p.no_ref, p.pemohon, p.barang_id, p.rak_id, p.operator_id, p.qr_code,
   p.qty, p.keterangan, p.status, p.created_at,
-  json_build_object('id',b.id,'kode',b.kode,'nama',b.nama,'stok_min',b.stok_min,
+  json_build_object('id',b.id,'kode',b.code,'nama',b.name,'stok_min',b.min_stock,
     'satuan_detail',json_build_object('id',s.id,'kode',s.kode,'nama',s.nama)) AS barang_detail,
   json_build_object('id',r.id,'kode',r.kode,'nama',r.nama,'qr_code',r.qr_code,'lokasi_id',r.lokasi_id,
-    'lokasi_detail', json_build_object('id',l.id,'kode',l.kode,'nama',l.nama)) AS rak_detail,
+    'lokasi_detail', json_build_object('id',l.id,'kode',l.code,'nama',l.name)) AS rak_detail,
   json_build_object('id',u.id,'username',u.username,'nama',u.nama) AS operator_detail`;
 
 function nextReference() {
@@ -90,11 +90,11 @@ export async function listPengambilan(search = '') {
     `SELECT ${historyFields}
      FROM withdrawals p
      LEFT JOIN items b ON b.id=p.barang_id
-     LEFT JOIN units s ON s.id=b.satuan_id
+     LEFT JOIN units s ON s.id=b.unit_id
      LEFT JOIN racks r ON r.id=p.rak_id
      LEFT JOIN locations l ON l.id=r.lokasi_id
      LEFT JOIN users u ON u.id=p.operator_id
-     WHERE $1 = '' OR p.no_ref ILIKE '%' || $1 || '%' OR p.pemohon ILIKE '%' || $1 || '%' OR b.nama ILIKE '%' || $1 || '%' OR r.nama ILIKE '%' || $1 || '%'
+     WHERE $1 = '' OR p.no_ref ILIKE '%' || $1 || '%' OR p.pemohon ILIKE '%' || $1 || '%' OR b.name ILIKE '%' || $1 || '%' OR r.nama ILIKE '%' || $1 || '%'
      ORDER BY p.created_at DESC, p.id DESC
     `,
     [search.trim()],
@@ -120,7 +120,7 @@ export async function verifyRackForBarang(qrCode, barangId) {
   if (result.rowCount) return { status: 'ok', barang: result.rows[0], rak: result.rows[0].rak_detail };
 
   const rack = await query(
-    `SELECT r.*, json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) AS lokasi_detail
+    `SELECT r.*, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail
      FROM racks r JOIN locations l ON l.id=r.lokasi_id WHERE r.qr_code=$1 OR r.kode=$1`,
     [qrCode],
   );
@@ -146,7 +146,7 @@ export async function listBarangByRackQr(qrCode) {
   }
 
   const rack = await query(
-    `SELECT r.*, json_build_object('id',l.id,'kode',l.kode,'nama',l.nama) AS lokasi_detail
+    `SELECT r.*, json_build_object('id',l.id,'kode',l.code,'nama',l.name) AS lokasi_detail
      FROM racks r LEFT JOIN locations l ON l.id=r.lokasi_id
      WHERE r.qr_code=$1 OR r.kode=$1`,
     [qrCode],
@@ -155,8 +155,8 @@ export async function listBarangByRackQr(qrCode) {
   const barang = await query(
     `SELECT ${barangFields}
      FROM items b ${barangJoins}
-     WHERE b.rak_id=$1 AND COALESCE(b.is_deleted, FALSE)=FALSE
-     ORDER BY b.nama ASC`,
+     WHERE b.rack_id=$1 AND COALESCE(b.is_deleted, FALSE)=FALSE
+     ORDER BY b.name ASC`,
     [rack.rows[0].id],
   );
   return { status: 'ok', rak: rack.rows[0], barang: barang.rows };
@@ -185,8 +185,8 @@ export async function executePengambilan(payload, operatorId, ip) {
   try {
     await client.query('BEGIN');
     const locked = await client.query(
-      `SELECT b.*, r.qr_code, r.kode AS rak_kode, r.nama AS rak_nama, s.nama AS satuan_nama
-       FROM items b JOIN racks r ON r.id=b.rak_id LEFT JOIN units s ON s.id=b.satuan_id
+      `SELECT b.*, b.code AS kode, b.name AS nama, b.item_group_id AS kelompok_id, b.unit_id AS satuan_id, b.rack_id AS rak_id, b.stock AS stok, b.min_stock AS stok_min, b.price AS harga, b.description AS deskripsi, r.qr_code, r.kode AS rak_kode, r.nama AS rak_nama, s.nama AS satuan_nama
+       FROM items b JOIN racks r ON r.id=b.rack_id LEFT JOIN units s ON s.id=b.unit_id
        WHERE b.id=$1 AND COALESCE(b.is_deleted, FALSE)=FALSE FOR UPDATE OF b`,
       [payload.barang_id],
     );
@@ -199,7 +199,7 @@ export async function executePengambilan(payload, operatorId, ip) {
 
     const noRef = nextReference();
     const newStock = Number(barang.stok) - payload.qty;
-    await client.query('UPDATE items SET stok=$1 WHERE id=$2', [newStock, payload.barang_id]);
+    await client.query('UPDATE items SET stock=$1 WHERE id=$2', [newStock, payload.barang_id]);
     const transaction = await client.query(
       `INSERT INTO withdrawals(no_ref,pemohon,barang_id,rak_id,operator_id,qr_code,qty,keterangan,status)
        VALUES($1,$2,$3,$4,$5,$6,$7,$8,'Disetujui') RETURNING id`,
@@ -211,7 +211,7 @@ export async function executePengambilan(payload, operatorId, ip) {
       [noRef, payload.barang_id, operatorId, payload.qty, newStock, `Diambil oleh ${payload.pemohon} dari ${barang.rak_nama}`],
     );
     await client.query(
-      `INSERT INTO activity_logs(user_id,aksi,modul,detail,ip)
+      `INSERT INTO activity_logs(user_id,action,module,detail,ip)
        VALUES($1,'Pengambilan','Pengambilan Barang',$2,$3)`,
       [operatorId, `${noRef}: ${barang.nama} ${formatNumber(payload.qty)} ${barang.satuan_nama || ''}; pengambil ${payload.pemohon}; QR ${barang.qr_code}`, ip],
     );
@@ -220,7 +220,7 @@ export async function executePengambilan(payload, operatorId, ip) {
       `SELECT ${historyFields}
        FROM withdrawals p
        LEFT JOIN items b ON b.id=p.barang_id
-       LEFT JOIN units s ON s.id=b.satuan_id
+       LEFT JOIN units s ON s.id=b.unit_id
        LEFT JOIN racks r ON r.id=p.rak_id
        LEFT JOIN locations l ON l.id=r.lokasi_id
        LEFT JOIN users u ON u.id=p.operator_id

@@ -31,7 +31,7 @@ export function requestUserId(req) {
   return null;
 }
 
-export async function logActivity({ req, userId, aksi, modul, detail }) {
+export async function logActivity({ req, userId, action, module, detail }) {
   const actorId = userId ?? requestUserId(req || {});
   const ip = req?.ip || null;
 
@@ -40,20 +40,20 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
       store.activity_logs ||= [];
       store.activity_logs.unshift({
         id: Math.max(0, ...store.activity_logs.map((row) => Number(row.id) || 0)) + 1,
-        waktu: new Date().toISOString(),
+        occurred_at: new Date().toISOString(),
         user_id: actorId,
-        aksi,
-        modul,
+        action,
+        module,
         detail,
         ip,
       });
     });
-    if (req) { req.activityLogged = true; req.activityLoggedFailure = String(aksi).startsWith('Gagal') || aksi === 'Ditolak Akses'; }
+    if (req) { req.activityLogged = true; req.activityLoggedFailure = String(action).startsWith('Gagal') || action === 'Ditolak Akses'; }
     return;
   }
 
-  const columns = ['aksi', 'modul', 'detail', 'ip'];
-  const values = [aksi, modul, detail, ip];
+  const columns = ['action', 'module', 'detail', 'ip'];
+  const values = [action, module, detail, ip];
   const existingColumns = await logColumns();
   if (existingColumns.has('user_id')) {
     columns.unshift('user_id');
@@ -69,7 +69,7 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
      VALUES(${columns.map((_, index) => `$${index + 1}`).join(', ')})`,
     values,
   );
-  if (req) { req.activityLogged = true; req.activityLoggedFailure = String(aksi).startsWith('Gagal') || aksi === 'Ditolak Akses'; }
+  if (req) { req.activityLogged = true; req.activityLoggedFailure = String(action).startsWith('Gagal') || action === 'Ditolak Akses'; }
 }
 
 export function safeLogActivity(payload) {
@@ -87,19 +87,19 @@ export async function listActivities(search = '') {
         ...row,
         user_detail: (store.users || []).find((user) => Number(user.id) === Number(row.user_id)) || null,
       }))
-      .filter((row) => !term || `${row.aksi} ${row.modul || ''} ${row.detail || ''} ${row.user_detail?.nama || ''}`.toLowerCase().includes(term));
+      .filter((row) => !term || `${row.action} ${row.module || ''} ${row.detail || ''} ${row.user_detail?.nama || ''}`.toLowerCase().includes(term));
   }
 
   const existingColumns = await logColumns();
   const hasUserId = existingColumns.has('user_id');
   const hasUserName = existingColumns.has('user_name');
   return (await query(
-    `SELECT a.id, a.waktu, ${hasUserId ? 'a.user_id' : 'NULL::bigint AS user_id'}, a.aksi, a.modul, a.detail, a.ip, a.created_at,
+    `SELECT a.id, a.occurred_at, ${hasUserId ? 'a.user_id' : 'NULL::bigint AS user_id'}, a.action, a.module, a.detail, a.ip, a.created_at,
       ${hasUserId ? "json_build_object('id',u.id,'username',u.username,'nama',u.nama)" : `json_build_object('id',NULL,'username',NULL,'nama',${hasUserName ? 'a.user_name' : 'NULL'})`} AS user_detail
      FROM activity_logs a
      ${hasUserId ? 'LEFT JOIN users u ON u.id=a.user_id' : ''}
-     WHERE $1 = '' OR a.aksi ILIKE '%' || $1 || '%' OR a.modul ILIKE '%' || $1 || '%' OR a.detail ILIKE '%' || $1 || '%' ${hasUserId ? "OR u.nama ILIKE '%' || $1 || '%'" : hasUserName ? "OR a.user_name ILIKE '%' || $1 || '%'" : ''}
-     ORDER BY a.waktu DESC, a.id DESC`,
+     WHERE $1 = '' OR a.action ILIKE '%' || $1 || '%' OR a.module ILIKE '%' || $1 || '%' OR a.detail ILIKE '%' || $1 || '%' ${hasUserId ? "OR u.nama ILIKE '%' || $1 || '%'" : hasUserName ? "OR a.user_name ILIKE '%' || $1 || '%'" : ''}
+     ORDER BY a.occurred_at DESC, a.id DESC`,
     [search.trim()],
   )).rows;
 }

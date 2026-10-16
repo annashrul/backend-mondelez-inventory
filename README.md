@@ -181,3 +181,17 @@ Semua respons API aplikasi melewati audit terpusat: aksi baca/pencarian, perubah
 ## English database table names
 
 Existing databases: run `npm run db:migrate:table-names` before deploying this backend. The migration preserves data and removes legacy compatibility views. Deploy the updated backend together with the migration. See [table mappings and deployment checks](docs/english-table-names.md).
+
+
+## Activity log column names
+
+The `activity_logs` table and `/log-activity` API now use `occurred_at`, `action` and `module`. Deploy the updated backend and frontend together with `npm run db:migrate:activity-log-columns`. See [migration and integrity checks](docs/activity-log-columns.md).
+
+
+## Item and item-group column names
+
+The `items` and `item_groups` tables now use English physical columns and English fields on their primary API endpoints. Apply `npm run db:migrate:item-columns` together with the updated backend/frontend. See [field mappings, API integration and integrity checks](docs/item-columns.md).
+
+Level and location column migration: [docs/level-location-columns.md](docs/level-location-columns.md).
+
+Menu column migration: [docs/menu-columns.md](docs/menu-columns.md).

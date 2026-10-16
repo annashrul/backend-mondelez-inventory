@@ -25,7 +25,7 @@ export function searchAudit({ record = recordSearch } = {}) {
       await record({ id, created_at: new Date().toISOString(), user_id: requestUserId(req), ...context,
         status, http_status: statusCode, duration_ms: Math.max(0,Math.round(performance.now()-started)),
         result_count: status === 'error' ? 0 : Number(body?.pagination?.total ?? rows.length), returned_count: rows.length,
-        results: rows.slice(0,100).map((row,index) => ({ id: row.id, nama: row.nama, kode: row.kode, rank: index+1,
+        results: rows.slice(0,100).map((row,index) => ({ id: row.id, nama: row.name ?? row.nama, kode: row.code ?? row.kode, rank: index+1,
           text_similarity: score(row.text_similarity), confidence: score(row.confidence), distance: score(row.distance) })),
         model: typeof body?.model === 'string' ? body.model : null,
         error_code: noCatalog ? 'NO_COMPATIBLE_EMBEDDINGS' : status === 'error' ? `HTTP_${statusCode}` : null,

@@ -7,20 +7,20 @@ export function describeActivity(req, status, body) {
   const path = (req.originalUrl || req.url || '').split('?')[0];
   if (!path.startsWith('/api/v1/') || (ignored.has(path) && status < 400) || req.method === 'OPTIONS') return null;
   const [resource, segment] = path.slice('/api/v1/'.length).split('/');
-  const modul = modules[resource] || 'Aplikasi';
-  let aksi = ({ GET: 'Lihat', POST: 'Tambah', PUT: 'Edit', PATCH: 'Edit', DELETE: 'Hapus' })[req.method] || 'Akses';
-  if (resource === 'auth') aksi = segment === 'logout' ? 'Logout' : segment === 'session' ? 'Validasi Sesi' : body?.requires_2fa || segment === 'verify-otp' ? 'Verifikasi' : 'Login';
-  else if (segment === 'backup') aksi = 'Backup';
-  else if (segment === 'test-email') aksi = 'Uji Email';
-  else if (segment === 'kode-otomatis' || segment === 'barcode-otomatis') aksi = 'Generate';
-  else if (segment === 'scan' || segment === 'items') aksi = 'Scan';
-  else if (resource === 'ai') aksi = 'Cari';
-  else if (req.method === 'GET' && req.query?.search) aksi = 'Cari';
+  const module = modules[resource] || 'Aplikasi';
+  let action = ({ GET: 'Lihat', POST: 'Tambah', PUT: 'Edit', PATCH: 'Edit', DELETE: 'Hapus' })[req.method] || 'Akses';
+  if (resource === 'auth') action = segment === 'logout' ? 'Logout' : segment === 'session' ? 'Validasi Sesi' : body?.requires_2fa || segment === 'verify-otp' ? 'Verifikasi' : 'Login';
+  else if (segment === 'backup') action = 'Backup';
+  else if (segment === 'test-email') action = 'Uji Email';
+  else if (segment === 'kode-otomatis' || segment === 'barcode-otomatis') action = 'Generate';
+  else if (segment === 'scan' || segment === 'items') action = 'Scan';
+  else if (resource === 'ai') action = 'Cari';
+  else if (req.method === 'GET' && req.query?.search) action = 'Cari';
   const filters = ['search', 'page', 'limit', 'tipe', 'barang_id', 'rak_id'].filter(key => req.query?.[key] !== undefined)
     .map(key => `${key}=${String(req.query[key]).slice(0, 200)}`).join(', ');
   const detail = `${req.method} ${modules[resource] ? resource : 'endpoint'}${segment && /^[0-9]+$/.test(segment) ? ` ID ${segment}` : ''}${filters ? `; ${filters}` : ''}; HTTP ${status}`;
   const username = resource === 'auth' && segment === 'login' && status >= 400 && /^[A-Za-z0-9._@-]{1,100}$/.test(req.body?.username || '') ? `; username percobaan ${req.body.username}` : '';
-  return { req, aksi: status >= 400 ? `Gagal ${aksi}` : aksi, modul, detail: detail + username };
+  return { req, action: status >= 400 ? `Gagal ${action}` : action, module, detail: detail + username };
 }
 
 // Await recording before the JSON response reaches the client, so opening the

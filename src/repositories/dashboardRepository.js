@@ -52,15 +52,15 @@ export async function getDashboardStats({ days = 30, now = new Date() } = {}) {
     query(
       `SELECT
         COUNT(*)::int AS total_barang,
-        COALESCE(SUM(COALESCE(stok,0) * COALESCE(harga,0)),0)::numeric AS nilai_inventory,
-        COUNT(*) FILTER (WHERE COALESCE(stok,0) <= COALESCE(stok_min,0))::int AS stok_menipis,
+        COALESCE(SUM(COALESCE(stock,0) * COALESCE(price,0)),0)::numeric AS nilai_inventory,
+        COUNT(*) FILTER (WHERE COALESCE(stock,0) <= COALESCE(min_stock,0))::int AS stok_menipis,
         (SELECT COUNT(*)::int FROM stock_movements WHERE (tanggal::timestamptz AT TIME ZONE 'Asia/Jakarta')::date = $1::date) AS total_transaksi
        FROM items
        WHERE COALESCE(is_deleted, FALSE)=FALSE`, [range.endDate],
     ),
     query(
       `SELECT k.id, k.tanggal, k.tipe, k.no_ref, k.qty, k.keterangan,
-        COALESCE(b.nama, '-') AS barang,
+        COALESCE(b.name, '-') AS barang,
         COALESCE(u.nama, u.username, '-') AS user
        FROM stock_movements k
        LEFT JOIN items b ON b.id=k.barang_id
@@ -69,13 +69,13 @@ export async function getDashboardStats({ days = 30, now = new Date() } = {}) {
        LIMIT 5`,
     ),
     query(
-      `SELECT b.id, b.kode, b.nama, b.stok, b.stok_min,
+      `SELECT b.id, b.code AS kode, b.name AS nama, b.stock AS stok, b.min_stock AS stok_min,
         json_build_object('id',s.id,'kode',s.kode,'nama',s.nama) AS satuan_detail
        FROM items b
-       LEFT JOIN units s ON s.id=b.satuan_id
+       LEFT JOIN units s ON s.id=b.unit_id
        WHERE COALESCE(b.is_deleted, FALSE)=FALSE
-         AND COALESCE(b.stok,0) <= COALESCE(b.stok_min,0)
-       ORDER BY b.stok ASC, b.nama ASC
+         AND COALESCE(b.stock,0) <= COALESCE(b.min_stock,0)
+       ORDER BY b.stock ASC, b.name ASC
        LIMIT 5`,
     ),
     query(
@@ -89,16 +89,16 @@ export async function getDashboardStats({ days = 30, now = new Date() } = {}) {
        FROM stock_movements WHERE tanggal::timestamptz >= $1::timestamptz AND tanggal::timestamptz < $2::timestamptz GROUP BY 1 ORDER BY 1`, [range.start, range.end],
     ),
     query(
-      `SELECT p.barang_id, COALESCE(b.nama,'-') AS nama, COALESCE(s.nama,'') AS satuan,
+      `SELECT p.barang_id, COALESCE(b.name,'-') AS nama, COALESCE(s.nama,'') AS satuan,
         COUNT(*)::int AS total_transaksi, COALESCE(SUM(p.qty),0)::numeric AS total_qty
-       FROM withdrawals p LEFT JOIN items b ON b.id=p.barang_id LEFT JOIN units s ON s.id=b.satuan_id
+       FROM withdrawals p LEFT JOIN items b ON b.id=p.barang_id LEFT JOIN units s ON s.id=b.unit_id
        WHERE p.tanggal::timestamptz >= $1::timestamptz AND p.tanggal::timestamptz < $2::timestamptz AND p.status='Disetujui'
-       GROUP BY p.barang_id,b.nama,s.nama ORDER BY total_transaksi DESC,p.barang_id LIMIT 5`, [range.start, range.end],
+       GROUP BY p.barang_id,b.name,s.nama ORDER BY total_transaksi DESC,p.barang_id LIMIT 5`, [range.start, range.end],
     ),
     query(
-      `SELECT b.kelompok_id,k.nama,COUNT(*)::int AS total_barang
-       FROM items b LEFT JOIN item_groups k ON k.id=b.kelompok_id WHERE COALESCE(b.is_deleted,FALSE)=FALSE
-       GROUP BY b.kelompok_id,k.nama ORDER BY total_barang DESC,b.kelompok_id`,
+      `SELECT b.item_group_id AS kelompok_id,k.name AS nama,COUNT(*)::int AS total_barang
+       FROM items b LEFT JOIN item_groups k ON k.id=b.item_group_id WHERE COALESCE(b.is_deleted,FALSE)=FALSE
+       GROUP BY b.item_group_id,k.name ORDER BY total_barang DESC,b.item_group_id`,
     ),
     query(
       `SELECT status,COUNT(*)::int AS total FROM withdrawals

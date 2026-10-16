@@ -38,8 +38,8 @@ export async function postAdjustment(req, res, next) {
     const result = await createAdjustment(payload(req.body), requestUserId(req));
     await safeLogActivity({
       req,
-      aksi: 'Adjustment',
-      modul: 'Adjustment Stok',
+      action: 'Adjustment',
+      module: 'Adjustment Stok',
       detail: `${result.adjustment.no_ref}: ${result.adjustment.barang_detail?.nama || 'Barang'} ${result.adjustment.tipe} ${formatNumber(result.adjustment.qty)}. Saldo akhir ${formatNumber(result.saldo)}`,
     });
     await createPengambilanNotification({ transaction: result.adjustment, stokAkhir: result.saldo, createdBy: requestUserId(req), adjustment: true });
