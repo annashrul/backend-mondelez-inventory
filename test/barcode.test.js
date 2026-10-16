@@ -8,7 +8,7 @@ import { barcodeCheckDigit, generateInternalBarcode } from '../src/utils/barcode
 process.env.NODE_ENV = 'test';
 const directory = await mkdtemp(path.join(tmpdir(), 'inventory-barcode-'));
 process.env.DATA_FILE = path.join(directory, 'store.json');
-await writeFile(process.env.DATA_FILE, JSON.stringify({ barang: [{ barcode: '2000000000008', is_deleted: true }] }));
+await writeFile(process.env.DATA_FILE, JSON.stringify({ items: [{ barcode: '2000000000008', is_deleted: true }] }));
 const { generateBarcode } = await import('../src/repositories/barangRepository.js');
 after(() => rm(directory, { recursive: true, force: true }));
 

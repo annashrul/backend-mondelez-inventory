@@ -9,7 +9,7 @@ async function logColumns() {
   if (logColumnCache) return logColumnCache;
   const result = await query(
     `SELECT column_name FROM information_schema.columns
-     WHERE table_schema='public' AND table_name='log_activity'
+     WHERE table_schema='public' AND table_name='activity_logs'
        AND column_name IN ('user_id', 'user_name')`,
   );
   logColumnCache = new Set(result.rows.map((row) => row.column_name));
@@ -37,9 +37,9 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
 
   if (useTestStore) {
     await updateStore((store) => {
-      store.log_activity ||= [];
-      store.log_activity.unshift({
-        id: Math.max(0, ...store.log_activity.map((row) => Number(row.id) || 0)) + 1,
+      store.activity_logs ||= [];
+      store.activity_logs.unshift({
+        id: Math.max(0, ...store.activity_logs.map((row) => Number(row.id) || 0)) + 1,
         waktu: new Date().toISOString(),
         user_id: actorId,
         aksi,
@@ -65,7 +65,7 @@ export async function logActivity({ req, userId, aksi, modul, detail }) {
   }
 
   await query(
-    `INSERT INTO log_activity(${columns.join(', ')})
+    `INSERT INTO activity_logs(${columns.join(', ')})
      VALUES(${columns.map((_, index) => `$${index + 1}`).join(', ')})`,
     values,
   );
@@ -82,10 +82,10 @@ export async function listActivities(search = '') {
   const term = search.trim().toLowerCase();
   if (useTestStore) {
     const store = await readStore();
-    return (store.log_activity || [])
+    return (store.activity_logs || [])
       .map((row) => ({
         ...row,
-        user_detail: (store.users || store.pengguna || []).find((user) => Number(user.id) === Number(row.user_id)) || null,
+        user_detail: (store.users || []).find((user) => Number(user.id) === Number(row.user_id)) || null,
       }))
       .filter((row) => !term || `${row.aksi} ${row.modul || ''} ${row.detail || ''} ${row.user_detail?.nama || ''}`.toLowerCase().includes(term));
   }
@@ -96,7 +96,7 @@ export async function listActivities(search = '') {
   return (await query(
     `SELECT a.id, a.waktu, ${hasUserId ? 'a.user_id' : 'NULL::bigint AS user_id'}, a.aksi, a.modul, a.detail, a.ip, a.created_at,
       ${hasUserId ? "json_build_object('id',u.id,'username',u.username,'nama',u.nama)" : `json_build_object('id',NULL,'username',NULL,'nama',${hasUserName ? 'a.user_name' : 'NULL'})`} AS user_detail
-     FROM log_activity a
+     FROM activity_logs a
      ${hasUserId ? 'LEFT JOIN users u ON u.id=a.user_id' : ''}
      WHERE $1 = '' OR a.aksi ILIKE '%' || $1 || '%' OR a.modul ILIKE '%' || $1 || '%' OR a.detail ILIKE '%' || $1 || '%' ${hasUserId ? "OR u.nama ILIKE '%' || $1 || '%'" : hasUserName ? "OR a.user_name ILIKE '%' || $1 || '%'" : ''}
      ORDER BY a.waktu DESC, a.id DESC`,

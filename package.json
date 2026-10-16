@@ -9,7 +9,9 @@
     "db:migrate": "node scripts/migrate.js",
     "db:verify": "node scripts/verify-database.js",
     "test": "node --test",
-    "db:migrate:search-audit": "node scripts/migrate-search-audit.js"
+    "db:migrate:search-audit": "node scripts/migrate-search-audit.js",
+    "db:migrate:table-names": "node scripts/migrate-table-names.js",
+    "db:check:table-names": "node scripts/check-table-name-migration.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

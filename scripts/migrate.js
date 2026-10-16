@@ -15,6 +15,8 @@ try {
   await client.connect();
   await client.query('BEGIN');
   await client.query(sql);
+  await client.query(await readFile(new URL('../migrations/001_search_audit.sql', import.meta.url), 'utf8'));
+  await client.query(await readFile(new URL('../migrations/002_english_table_names.sql', import.meta.url), 'utf8'));
   await client.query('COMMIT');
   console.log('Migrasi Supabase berhasil.');
 } catch (error) {

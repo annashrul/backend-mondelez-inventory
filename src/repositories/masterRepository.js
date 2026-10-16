@@ -4,10 +4,10 @@ import { readStore, updateStore } from '../config/store.js';
 const useTestStore = process.env.NODE_ENV === 'test';
 
 export const masterConfigs = {
-  'kelompok-barang': { table: 'kelompok_barang', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'kelompok_id', 'jumlah_barang'], prefix: 'KLP' },
-  satuan: { table: 'satuan', fields: ['kode', 'nama', 'deskripsi'], count: ['barang', 'satuan_id', 'jumlah_barang'], prefix: 'STN' },
-  lokasi: { table: 'lokasi', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['rak', 'lokasi_id', 'jumlah_rak'], prefix: 'LOK' },
-  rak: { table: 'rak', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['barang', 'rak_id', 'jumlah_barang'], prefix: 'RAK' }
+  'kelompok-barang': { table: 'item_groups', fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'kelompok_id', 'jumlah_barang'], prefix: 'KLP' },
+  satuan: { table: 'units', fields: ['kode', 'nama', 'deskripsi'], count: ['items', 'satuan_id', 'jumlah_barang'], prefix: 'STN' },
+  lokasi: { table: 'locations', fields: ['kode', 'nama', 'alamat', 'deskripsi'], count: ['racks', 'lokasi_id', 'jumlah_rak'], prefix: 'LOK' },
+  rak: { table: 'racks', fields: ['kode', 'qr_code', 'nama', 'lokasi_id', 'kapasitas', 'terisi'], count: ['items', 'rak_id', 'jumlah_barang'], prefix: 'RAK' }
 };
 
 function configFor(key) {
@@ -27,7 +27,7 @@ function addTestCount(key, item, store) {
   if (!config.count) return item;
   const [referenceTable, referenceField, alias] = config.count;
   const result = { ...item, [alias]: (store[referenceTable] || []).filter((row) => row[referenceField] === item.id && !row.is_deleted).length };
-  if (key === 'rak') result.lokasi_detail = store.lokasi.find((row) => row.id === item.lokasi_id && !row.is_deleted) || null;
+  if (key === 'rak') result.lokasi_detail = store.locations.find((row) => row.id === item.lokasi_id && !row.is_deleted) || null;
   return result;
 }
 
@@ -66,7 +66,7 @@ export async function findAll(key, search = '') {
   }
   return (await query(
     `SELECT ${selectSql(key, config)} FROM ${config.table} m
-     ${key === 'rak' ? 'JOIN lokasi l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''}
+     ${key === 'rak' ? 'JOIN locations l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''}
      WHERE COALESCE(m.is_deleted, FALSE)=FALSE
        AND ($1 = '' OR m.kode ILIKE '%' || $1 || '%' OR m.nama ILIKE '%' || $1 || '%')
      ORDER BY m.id`, [search.trim()]
@@ -80,7 +80,7 @@ export async function findById(key, id) {
     const item = (store[config.table] || []).find((row) => row.id === id && !row.is_deleted);
     return item ? addTestCount(key, item, store) : null;
   }
-  return (await query(`SELECT ${selectSql(key, config)} FROM ${config.table} m ${key === 'rak' ? 'JOIN lokasi l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''} WHERE m.id=$1 AND COALESCE(m.is_deleted, FALSE)=FALSE`, [id])).rows[0] || null;
+  return (await query(`SELECT ${selectSql(key, config)} FROM ${config.table} m ${key === 'rak' ? 'JOIN locations l ON l.id=m.lokasi_id AND COALESCE(l.is_deleted, FALSE)=FALSE' : ''} WHERE m.id=$1 AND COALESCE(m.is_deleted, FALSE)=FALSE`, [id])).rows[0] || null;
 }
 
 export async function create(key, item) {
@@ -88,7 +88,7 @@ export async function create(key, item) {
   if (useTestStore) return updateStore((store) => {
     store[config.table] ||= [];
     if (store[config.table].some((row) => !row.is_deleted && row.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
-    if (key === 'rak' && !store.lokasi.some((row) => row.id === item.lokasi_id && !row.is_deleted)) throw Object.assign(new Error('lokasi missing'), { code: 'INVALID_REFERENCE' });
+    if (key === 'rak' && !store.locations.some((row) => row.id === item.lokasi_id && !row.is_deleted)) throw Object.assign(new Error('lokasi missing'), { code: 'INVALID_REFERENCE' });
     const created = { id: Math.max(0, ...store[config.table].map((row) => row.id)) + 1, ...item };
     store[config.table].push(created);
     return addTestCount(key, created, store);
@@ -108,7 +108,7 @@ export async function update(key, id, item) {
     const index = store[config.table].findIndex((row) => row.id === id && !row.is_deleted);
     if (index < 0) return null;
     if (store[config.table].some((row) => !row.is_deleted && row.id !== id && row.kode.toLowerCase() === item.kode.toLowerCase())) throw Object.assign(new Error('duplicate'), { code: '23505' });
-    if (key === 'rak' && !store.lokasi.some((row) => row.id === item.lokasi_id && !row.is_deleted)) throw Object.assign(new Error('lokasi missing'), { code: 'INVALID_REFERENCE' });
+    if (key === 'rak' && !store.locations.some((row) => row.id === item.lokasi_id && !row.is_deleted)) throw Object.assign(new Error('lokasi missing'), { code: 'INVALID_REFERENCE' });
     store[config.table][index] = { ...store[config.table][index], ...item };
     return addTestCount(key, store[config.table][index], store);
   });

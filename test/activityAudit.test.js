@@ -7,7 +7,7 @@ process.env.NODE_ENV = 'test';
 const directory = await mkdtemp(path.join(tmpdir(), 'inventory-audit-'));
 process.env.DATA_FILE = path.join(directory, 'data.json');
 process.env.BACKUP_DIR = path.join(directory, 'backups');
-await writeFile(process.env.DATA_FILE, JSON.stringify({ ...(await import('../src/data/seed.js')).seedData, log_activity: [], levels: [{ id: 1, nama: 'Admin' }], users: [{ id: 1, nama: 'Admin', level_id: 1, status: 'Aktif' }] }));
+await writeFile(process.env.DATA_FILE, JSON.stringify({ ...(await import('../src/data/seed.js')).seedData, activity_logs: [], levels: [{ id: 1, nama: 'Admin' }], users: [{ id: 1, nama: 'Admin', level_id: 1, status: 'Aktif' }] }));
 const { default: app } = await import('../src/server.js');
 const { readStore } = await import('../src/config/store.js');
 const { createToken } = await import('../src/services/authService.js');
@@ -22,7 +22,7 @@ async function request(endpoint, method = 'GET', data, customHeaders = headers) 
   const response = await fetch(base + endpoint, { method, headers: customHeaders, body: data === undefined ? undefined : JSON.stringify(data) });
   return { status: response.status, body: await response.json() };
 }
-const logs = async () => (await readStore()).log_activity;
+const logs = async () => (await readStore()).activity_logs;
 after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); await rm(directory, { recursive: true, force: true }); });
 
 test('settings and notification changes are recorded once with actor and before/after values before responding', async () => {

@@ -14,7 +14,7 @@ test('production withdrawal responses include the database unit used by HTML and
   const history = { id: 10, no_ref: 'AMB-10', qty: 1, barang_detail: { nama: 'Oreo', satuan_detail: { id: 3, kode: 'ST-003', nama: 'pcs' } } };
   let reads = 0;
   const query = async sql => {
-    assert.match(sql, /LEFT JOIN satuan s ON s.id=b.satuan_id/);
+    assert.match(sql, /LEFT JOIN units s ON s.id=b.satuan_id/);
     assert.match(sql, /'satuan_detail',json_build_object\('id',s.id,'kode',s.kode,'nama',s.nama\)/);
     reads++;
     return { rows: [history] };

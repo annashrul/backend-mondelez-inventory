@@ -1,3 +1,4 @@
+import { normalizeStoreTables } from './tableNames.js';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +21,7 @@ async function ensureStore() {
 
 export async function readStore() {
   await ensureStore();
-  return JSON.parse(await readFile(dataFile, 'utf8'));
+  return normalizeStoreTables(JSON.parse(await readFile(dataFile, 'utf8')));
 }
 
 export function updateStore(updater) {

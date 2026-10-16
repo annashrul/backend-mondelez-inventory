@@ -176,3 +176,8 @@ log baru; IP asli pada log lama tidak dapat dipulihkan dari nilai localhost.
 Semua respons API aplikasi melewati audit terpusat: aksi baca/pencarian, perubahan data, kegagalan, dan penolakan akses dicatat sebelum respons JSON dikirim. Log bisnis yang sudah ada tidak digandakan. Pengaturan dan notifikasi menyimpan perubahan sebelum–sesudah hanya untuk field yang diizinkan; password, OTP, token, gambar, dan request body mentah tidak disalin ke log. Heartbeat sesi, health check, runtime settings, dan pembacaan Log Activity tidak menghasilkan catatan sukses berulang.
 
 `POST /api/v1/log-activity/events` mencatat aktivitas antarmuka yang tidak selalu memanggil API data: navigasi, pencarian/pagination/filter dari cache, preferensi pribadi, permintaan dialog cetak QR, dan percobaan aksi tanpa akses. Endpoint memvalidasi sesi, jenis aktivitas, dan field yang diperbolehkan; identitas pelaku diambil dari token, bukan user ID kiriman browser. Pengiriman email dan backup otomatis juga mencatat hasilnya. Saat menambah aksi antarmuka baru, gunakan kontrak event ini; jangan mengirim nilai form sensitif.
+
+
+## English database table names
+
+Existing databases: run `npm run db:migrate:table-names` before deploying this backend. The migration preserves data and removes legacy compatibility views. Deploy the updated backend together with the migration. See [table mappings and deployment checks](docs/english-table-names.md).

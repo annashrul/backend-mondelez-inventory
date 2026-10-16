@@ -38,7 +38,7 @@ export function buildDashboardAnalytics(store, { days = 30, now = new Date() } =
     const date = wibDate(row.tanggal || row.created_at);
     return date && date >= range.startDate && date <= range.endDate;
   };
-  const requests = (store.pengambilan_barang || store.pengambilan || []).filter(inRange);
+  const requests = (store.withdrawals || []).filter(inRange);
   const dailyWithdrawals = new Map();
   const dailyMovements = new Map();
   const popular = new Map();
@@ -48,14 +48,14 @@ export function buildDashboardAnalytics(store, { days = 30, now = new Date() } =
     if (transaction.status !== 'Disetujui') continue;
     const date = wibDate(transaction.tanggal || transaction.created_at);
     dailyWithdrawals.set(date, (dailyWithdrawals.get(date) || 0) + 1);
-    const product = (store.barang || []).find(item => Number(item.id) === Number(transaction.barang_id));
-    const unit = (store.satuan || []).find(item => Number(item.id) === Number(product?.satuan_id));
+    const product = (store.items || []).find(item => Number(item.id) === Number(transaction.barang_id));
+    const unit = (store.units || []).find(item => Number(item.id) === Number(product?.satuan_id));
     const item = popular.get(transaction.barang_id) || { barang_id: transaction.barang_id, nama: product?.nama || '-', satuan: unit?.nama || '', total_transaksi: 0, total_qty: 0 };
     item.total_transaksi++;
     item.total_qty += Number(transaction.qty || 0);
     popular.set(transaction.barang_id, item);
   }
-  for (const transaction of (store.kartu_stok || []).filter(inRange)) {
+  for (const transaction of (store.stock_movements || []).filter(inRange)) {
     if (!['Masuk', 'Keluar'].includes(transaction.tipe)) continue;
     const date = wibDate(transaction.tanggal);
     const counts = dailyMovements.get(date) || { date, masuk: 0, keluar: 0 };
@@ -63,9 +63,9 @@ export function buildDashboardAnalytics(store, { days = 30, now = new Date() } =
     dailyMovements.set(date, counts);
   }
   const categories = new Map();
-  for (const product of (store.barang || []).filter(item => !item.is_deleted)) {
+  for (const product of (store.items || []).filter(item => !item.is_deleted)) {
     const id = product.kelompok_id || null;
-    const group = (store.kelompok_barang || []).find(item => Number(item.id) === Number(id));
+    const group = (store.item_groups || []).find(item => Number(item.id) === Number(id));
     const category = categories.get(id) || { kelompok_id: id, nama: group?.nama || null, total_barang: 0 };
     category.total_barang++;
     categories.set(id, category);

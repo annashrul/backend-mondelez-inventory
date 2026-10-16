@@ -4,10 +4,10 @@ import { buildDashboardAnalytics, dashboardAnalyticsFromRows, dashboardRange, wi
 
 const now = new Date('2026-10-15T18:00:00Z');
 const store = {
-  barang: [{ id: 1, nama: 'Barang', kelompok_id: 10, satuan_id: 1 }, { id: 2, nama: 'Item B', kelompok_id: 20, satuan_id: 2 }, { id: 3, nama: 'Ungrouped' }, { id: 4, nama: 'Archived', kelompok_id: 10, is_deleted: true }],
-  satuan: [{ id: 1, nama: 'pcs' }, { id: 2, nama: 'box' }],
-  kelompok_barang: [{ id: 10, nama: 'Kelompok Barang' }, { id: 20, nama: 'Category B' }],
-  pengambilan_barang: [
+  items: [{ id: 1, nama: 'Barang', kelompok_id: 10, satuan_id: 1 }, { id: 2, nama: 'Item B', kelompok_id: 20, satuan_id: 2 }, { id: 3, nama: 'Ungrouped' }, { id: 4, nama: 'Archived', kelompok_id: 10, is_deleted: true }],
+  units: [{ id: 1, nama: 'pcs' }, { id: 2, nama: 'box' }],
+  item_groups: [{ id: 10, nama: 'Kelompok Barang' }, { id: 20, nama: 'Category B' }],
+  withdrawals: [
     { barang_id: 1, qty: 2, status: 'Disetujui', tanggal: '2026-10-15T17:30:00Z' },
     { barang_id: 1, qty: 3, status: 'Disetujui', tanggal: '2026-10-15T16:30:00Z' },
     { barang_id: 2, qty: 4, status: 'Disetujui', tanggal: '2026-10-10' },
@@ -18,7 +18,7 @@ const store = {
     { barang_id: 1, qty: 5, status: 'Disetujui', tanggal: '2026-10-16T17:00:00Z' },
     { barang_id: 4, qty: 7, status: 'Disetujui', tanggal: '2026-10-14' },
   ],
-  kartu_stok: [
+  stock_movements: [
     { tipe: 'Masuk', qty: 100, tanggal: '2026-10-15T17:00:00Z' },
     { tipe: 'Masuk', qty: 2, tanggal: '2026-10-16' },
     { tipe: 'Keluar', qty: 4, tanggal: '2026-10-16' },
@@ -54,7 +54,7 @@ test('rankings retain item units and history, while categories exclude archived 
 });
 
 test('empty periods have zero-filled charts, and SQL numeric aggregates are normalized', () => {
-  const empty = buildDashboardAnalytics({ barang: [], pengambilan_barang: [], kartu_stok: [] }, { days: 90, now });
+  const empty = buildDashboardAnalytics({ items: [], withdrawals: [], stock_movements: [] }, { days: 90, now });
   assert.equal(empty.daily.length, 90);
   assert.ok(empty.daily.every(day => day.pengambilan === 0 && day.masuk === 0 && day.keluar === 0));
   assert.deepEqual(empty.popularItems, []);

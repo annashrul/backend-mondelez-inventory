@@ -7,7 +7,7 @@ process.env.NODE_ENV = 'test';
 const directory = await mkdtemp(path.join(tmpdir(), 'inventory-search-audit-'));
 process.env.DATA_FILE = path.join(directory,'store.json');
 const { seedData } = await import('../src/data/seed.js');
-await writeFile(process.env.DATA_FILE, JSON.stringify({ ...seedData, search_audit: [], log_activity: [] }));
+await writeFile(process.env.DATA_FILE, JSON.stringify({ ...seedData, search_audit: [], activity_logs: [] }));
 const { default: app } = await import('../src/server.js');
 const { readStore } = await import('../src/config/store.js');
 const { createToken } = await import('../src/services/authService.js');
@@ -27,7 +27,7 @@ const entries = async () => (await readStore()).search_audit;
 after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); await rm(directory,{recursive:true,force:true}); });
 
 test('logs each actual search once with accurate totals, ranking and selected feedback', async () => {
-  const item = seedData.barang[0];
+  const item = seedData.items[0];
   const found = await request(`/barang?search=${encodeURIComponent(item.nama)}&fuzzy=true&search_method=voice&limit=1`);
   assert.equal(found.status,200);
   assert.ok(found.body.search_audit_id);
@@ -62,7 +62,7 @@ test('separates no results, camera, gallery, rack and backend errors without sav
   await request('/ai/search-image','POST',{search_method:'gallery'});
   assert.equal((await entries()).at(-1).status,'error');
   assert.equal((await entries()).at(-1).http_status,400);
-  await request('/rak/items','POST',{qr_code:seedData.rak[0].qr_code});
+  await request('/rak/items','POST',{qr_code:seedData.racks[0].qr_code});
   assert.equal((await entries()).at(-1).method,'rack');
 });
 
